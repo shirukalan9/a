@@ -1,4 +1,4 @@
-# Cleanup
+# Cleanup things
 rm -rf device vendor hardware android packages
 
 # ROM
