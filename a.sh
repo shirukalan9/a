@@ -1,10 +1,20 @@
 # Cleanup things
-rm -rf device vendor hardware android packages
+rm -rf device/infinix device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages
+
+# Backup Keys
+LOG="key_status.txt"
+cp -r vendor/lineage-priv/keys /tmp/axion_keys_backup
+[ -d "/tmp/axion_keys_backup" ] && echo "[OK] Backuping to /tmp/." > $LOG || echo "[FAIL] Backup Failed." > $LOG
 
 # ROM
 repo init -u https://github.com/AxionAOSP/android.git -b lineage-23.2 --depth=1 --git-lfs
 /opt/crave/resync.sh
 source build/envsetup.sh
+
+# Restore keys
+mkdir -p vendor/lineage-priv/keys
+cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
+[ -f "vendor/lineage-priv/keys/releasekey.pk8" ] && echo "[OK] Restore to vendor/ success." >> $LOG || echo "[FAIL] Restore failed." >> $LOG
 
 ---------------------------------------------------
 # Device 
@@ -18,9 +28,8 @@ git clone --depth=1 https://github.com/mt6789-transsion/hardware_transsion hardw
 git clone --depth=1 https://github.com/MillenniumOSS/android_device_mediatek_sepolicy_vndr device/mediatek/sepolicy_vndr
 git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_mediatek hardware/mediatek
 -----------------------------------------------------
+
 # Build
-mkdir -p vendor/lineage-priv/keys/
-gk -s
 axion X6882 user va
 ax -br -j$(nproc)
 
