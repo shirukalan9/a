@@ -18,7 +18,7 @@ cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
 source build/envsetup.sh
 ---------------------------------------------------
 # Device 
-git clone -b axion https://github.com/zaidanprjkt/device_infinix_X6882 device/infinix/X6882
+git clone -b axion-16.2 https://github.com/zaidanprjkt/device_infinix_X6882 device/infinix/X6882
 git clone --depth=1 https://github.com/javas-prjkt/android_vendor_infinix_X6882 vendor/infinix/X6882
 git clone --depth=1 https://github.com/zaidannn7/device_infinix_X6882-kernel device/infinix/X6882-kernel
 ----------------------------------------------------
