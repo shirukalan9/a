@@ -23,7 +23,7 @@ git clone --depth=1 https://github.com/javas-prjkt/android_vendor_infinix_X6882 
 git clone --depth=1 https://github.com/zaidannn7/device_infinix_X6882-kernel device/infinix/X6882-kernel
 ----------------------------------------------------
 # Mediatek Specific
-git clone --depth=1 -b sixteen-qpr2 https://github.com/MillenniumOSS/android_vendor_mediatek_ims vendor/mediatek/ims
+git clone --depth=1 -b sixteen-oem https://github.com/MillenniumOSS/android_vendor_mediatek_ims vendor/mediatek/ims
 git clone --depth=1 https://github.com/mt6789-transsion/hardware_transsion hardware/transsion
 git clone --depth=1 https://github.com/MillenniumOSS/android_device_mediatek_sepolicy_vndr device/mediatek/sepolicy_vndr
 git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_mediatek hardware/mediatek
