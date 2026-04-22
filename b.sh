@@ -7,7 +7,7 @@ cp -r vendor/lineage-priv/keys /tmp/axion_keys_backup
 [ -d "/tmp/axion_keys_backup" ] && echo "[OK] Backuping to /tmp/." > $LOG || echo "[FAIL] Backup Failed." > $LOG
 
 # ROM
-repo init -u https://github.com/AxionAOSP/android.git -b lineage-23.2 --depth=1 --git-lfs
+repo init --depth=1 --no-repo-verify --git-lfs -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mips,-darwin,-notdefault
 /opt/crave/resync.sh
 
 # Restore keys
@@ -29,5 +29,5 @@ git clone --depth=1 https://github.com/MillenniumOSS/android_device_mediatek_sep
 git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_mediatek hardware/mediatek
 -----------------------------------------------------
 # Build
-axion X6882 user va
-ax -br -j$(nproc)
+lunch infinity_X6882-user
+m bacon -j$(nproc --all)
