@@ -15,7 +15,7 @@ mkdir -p vendor/lineage-priv/keys
 cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
 [ -f "vendor/lineage-priv/keys/releasekey.pk8" ] && echo "[OK] Restore to vendor/ success." >> $LOG || echo "[FAIL] Restore failed." >> $LOG
 
-source build/envsetup.sh
+. build/envsetup.sh
 ---------------------------------------------------
 # Device 
 git clone -b lineage-23.0 https://github.com/shirukalan9/z device/infinix/X6882
