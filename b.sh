@@ -19,7 +19,7 @@ cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
 ---------------------------------------------------
 # Device 
 git clone -b lineage-23.0 https://github.com/shirukalan9/z device/infinix/X6882
-git clone --depth=1 https://gitlab.com/zaidannn7/vendor_infinix_X6882 vendor/infinix/X6882
+git clone --depth=1 -b fixup https://gitlab.com/zaidannn7/vendor_infinix_X6882 vendor/infinix/X6882
 git clone --depth=1 https://github.com/mt6789-transsion/device_infinix_X6882-kernel device/infinix/X6882-kernel
 ----------------------------------------------------
 # Mediatek Specific
