@@ -13,13 +13,12 @@ repo init --depth=1 --no-repo-verify --git-lfs -u https://github.com/ProjectInfi
 # Restore keys
 mkdir -p vendor/lineage-priv/keys
 cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
-[ -f "vendor/lineage-priv/keys/releasekey.pk8" ] && echo "[OK] Restore to vendor/ success." >> $LOG || echo "[FAIL] Restore failed." && exit 1 >> $LOG
+[ -f "vendor/lineage-priv/keys/releasekey.pk8" ] && echo "[OK] Restore to vendor/ success." >> $LOG || echo "[FAIL] Restore failed." >> $LOG
 
-. build/envsetup.sh
 ---------------------------------------------------
 # Device 
 git clone -b lineage-23.0 https://github.com/shirukalan9/z device/infinix/X6882
-git clone --depth=1 -b fixup https://gitlab.com/zaidannn7/vendor_infinix_X6882 vendor/infinix/X6882
+git clone -b fixup https://gitlab.com/zaidannn7/vendor_infinix_X6882 vendor/infinix/X6882
 git clone --depth=1 https://github.com/mt6789-transsion/device_infinix_X6882-kernel device/infinix/X6882-kernel
 ----------------------------------------------------
 # Mediatek Specific
@@ -28,6 +27,8 @@ git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_millennium
 git clone --depth=1 https://github.com/MillenniumOSS/android_device_mediatek_sepolicy_vndr device/mediatek/sepolicy_vndr
 git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_mediatek hardware/mediatek
 -----------------------------------------------------
+
 # Build
+source build/envsetup.sh
 lunch infinity_X6882-user
-m bacon -j$(nproc --all)
+m bacon 
