@@ -38,6 +38,9 @@ rm a.py
 wget -q https://raw.githubusercontent.com/zaidannn7/patches/refs/heads/main/a.py 
 python3 a.py || exit 1
 
+curl -O https://raw.githubusercontent.com/shirukalan9/kys/refs/heads/main/b.py
+python3 b.py system/logging/liblog/logger_write.cpp
+
 # Build
 axion X6882 user va
 ax -br -j$(nproc)
