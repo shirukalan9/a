@@ -18,13 +18,13 @@ cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
 source build/envsetup.sh
 ---------------------------------------------------
 # Device 
-git clone -b axion-16.2 https://github.com/zaidanprjkt/device_infinix_X6882 device/infinix/X6882
-git clone --depth=1 https://github.com/javas-prjkt/android_vendor_infinix_X6882 vendor/infinix/X6882
+git clone -b axion-16.2 https://github.com/zaidannn7/b device/infinix/X6882
+git clone --depth=1 https://gitlab.com/zaidannn7/vendor_infinix_X6882 vendor/infinix/X6882
 git clone --depth=1 https://github.com/zaidannn7/device_infinix_X6882-kernel device/infinix/X6882-kernel
 ----------------------------------------------------
 # Mediatek Specific
 git clone --depth=1 -b sixteen-oem https://github.com/MillenniumOSS/android_vendor_mediatek_ims vendor/mediatek/ims
-git clone --depth=1 https://github.com/mt6789-transsion/hardware_transsion hardware/transsion
+git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_millennium hardware/millennium
 git clone --depth=1 https://github.com/MillenniumOSS/android_device_mediatek_sepolicy_vndr device/mediatek/sepolicy_vndr
 git clone --depth=1 https://github.com/MillenniumOSS/android_hardware_mediatek hardware/mediatek
 git clone https://github.com/MillenniumOSS/android_device_millennium_common-kernel device/millennium/common-kernel
@@ -34,9 +34,9 @@ export BUILD_HOSTNAME=android
 export KBUILD_BUILD_NAME=zaidannn7
 export KBUILD_BUILD_HOST=android
 
-rm a.py
-wget -q https://raw.githubusercontent.com/zaidannn7/patches/refs/heads/main/a.py 
-python3 a.py || exit 1
+#rm a.py
+#wget -q https://raw.githubusercontent.com/zaidannn7/patches/refs/heads/main/a.py 
+#python3 a.py || exit 1
 
 
 # Build
