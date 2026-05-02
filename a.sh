@@ -34,13 +34,13 @@ export BUILD_HOSTNAME=android
 export KBUILD_BUILD_NAME=zaidannn7
 export KBUILD_BUILD_HOST=android
 
-#rm a.py
-#wget -q https://raw.githubusercontent.com/zaidannn7/patches/refs/heads/main/a.py 
-#python3 a.py || exit 1
+rm a.py
+wget -q https://raw.githubusercontent.com/shirukalan9/anooo/refs/heads/main/a.py 
+python3 a.py || exit 1
 
 
 # Build
-axion X6882 user va
+axion X6882 user pico
 ax -br -j$(nproc)
 
 
