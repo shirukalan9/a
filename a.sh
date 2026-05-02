@@ -1,5 +1,5 @@
 # Cleanup things
-rm -rf device/infinix rm -rf hardware/lineage/compat device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages
+rm -rf device/infinix rm -rf hardware/lineage/compat device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
 
 # Backup Keys
 LOG="key_status.txt"
