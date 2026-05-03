@@ -2,18 +2,31 @@
 rm -rf device/infinix tools hardware/lineage/compat device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
 
 # Backup Keys
-LOG="key_status.txt"
-cp -r vendor/lineage-priv/keys /tmp/axion_keys_backup
-[ -d "/tmp/axion_keys_backup" ] && echo "[OK] Backuping to /tmp/." > $LOG || echo "[FAIL] Backup Failed." > $LOG
+LOG="key_backup.log"
+BACKUP_FILE="keys_backup.tar.gz"
 
-# ROM
-repo init -u https://github.com/AxionAOSP/android.git -b lineage-23.2 --depth=1 --git-lfs
-/opt/crave/resync.sh
+{
+    echo "Backup keys..."
+    tar czf "$BACKUP_FILE" vendor/lineage-priv/keys/
+    echo "Created: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
+    echo "Files: $(tar tzf "$BACKUP_FILE" | wc -l)"
 
-# Restore keys
-mkdir -p vendor/lineage-priv/keys
-cp -r /tmp/axion_keys_backup/* vendor/lineage-priv/keys/
-[ -f "vendor/lineage-priv/keys/releasekey.pk8" ] && echo "[OK] Restore to vendor/ success." >> $LOG || echo "[FAIL] Restore failed." >> $LOG
+    UPLOAD_URL=$(curl -s -T "$BACKUP_FILE" https://bashupload.app)
+    [ -z "$UPLOAD_URL" ] && { echo "ERROR: Upload failed"; exit 1; }
+    echo "URL: $UPLOAD_URL"
+
+    repo init -u https://github.com/AxionAOSP/android.git -b lineage-23.2 --depth=1 --git-lfs
+    /opt/crave/resync.sh
+
+    mkdir -p vendor/lineage-priv/keys
+    curl -L "$UPLOAD_URL" -o /tmp/keys_restore.tar.gz
+    tar xzf /tmp/keys_restore.tar.gz -C vendor/lineage-priv/keys/ --strip-components=1
+
+    [ -f "vendor/lineage-priv/keys/releasekey.pk8" ] || { echo "ERROR: Restore failed"; exit 1; }
+
+    source build/envsetup.sh
+
+} | tee "$LOG"
 
 source build/envsetup.sh
 ---------------------------------------------------
