@@ -24,8 +24,6 @@ BACKUP_FILE="keys_backup.tar.gz"
 
     [ -f "vendor/lineage-priv/keys/releasekey.pk8" ] || { echo "ERROR: Restore failed"; exit 1; }
 
-    source build/envsetup.sh
-
 } | tee "$LOG"
 
 source build/envsetup.sh
