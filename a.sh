@@ -43,7 +43,7 @@ ax -br -j$(nproc)
 
 
 wget -q https://raw.githubusercontent.com/shirukalan9/anooo/refs/heads/main/b.py 
-python3 b.py
+python3 b.py system/logging/liblog/logger_write.cpp
 m liblog
 
 
