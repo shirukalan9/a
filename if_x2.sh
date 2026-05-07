@@ -2,8 +2,9 @@
 rm -rf device/infinix tools hardware/ device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
 
 # DT
-BRANCH_DT=axion-16.2
+BRANCH_DT=inf
 BRANCH_VT=lineage-23.2
+DEVICE=X6882
 
 # ROM Init
 repo init -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mips,-darwin,-notdefault --depth=1 --git-lfs --no-repo-verify/opt/crave/resync.sh
@@ -30,5 +31,5 @@ export KBUILD_BUILD_HOST=android
 
 # Build
 source build/envsetup.sh
-axion X6882 user pico
-ax -br -j$(nproc)
+lunch infinity_${DEVICE}-user
+m bacon -j$(nproc --all)
