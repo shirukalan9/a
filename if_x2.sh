@@ -4,9 +4,10 @@ rm -rf device/infinix tools hardware/ device/mediatek vendor/infinix vendor/medi
 # DT
 BRANCH_DT=axion-16.2
 BRANCH_VT=lineage-23.2
-# ROM Init
 
+# ROM Init
 repo init -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mips,-darwin,-notdefault --depth=1 --git-lfs --no-repo-verify/opt/crave/resync.sh
+/opt/crave/resync.sh
 
 
 #---------------------------------------------------
