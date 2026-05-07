@@ -2,7 +2,7 @@
 rm -rf device/infinix tools hardware/ device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
 
 # DT
-BRANCH_DT=axion-16.2
+BRANCH_DT=ax
 BRANCH_VT=lineage-23.2
 # ROM Init
 BRANCH_ROM=lineage-23.2
