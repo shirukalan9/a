@@ -29,10 +29,17 @@ export BUILD_HOSTNAME=android
 export KBUILD_BUILD_NAME=zaidannn7
 export KBUILD_BUILD_HOST=android
 
+# dirty
 cd build/tools
 wget -qO- https://github.com/Evolution-X/build/commit/d2817e9ad6a34ad08325742338f513ee5af2fa89.diff | git apply
 wget -qO- https://github.com/Evolution-X/build/commit/a8297166097f37cf2ddfb39cf0a84b289bd0a33e.diff | git apply
 cd ../..
+
+cd bionic
+#wget -qO- https://github.com/Lunaris-AOSP/bionic/commit/8b5c560e37449ea31b5dace03169d9c66ca2c597.diff | git apply
+#wget -qO- https://github.com/Lunaris-AOSP/bionic/commit/942b66163dff9677c179a5497dda4ad59413bdab.diff | git apply
+#wget -qO- https://github.com/Lunaris-AOSP/bionic/commit/4d7a152a86f47c32843dd82df6e631309efa36bc.diff | git apply
+cd ..
 
 # Build
 source build/envsetup.sh
