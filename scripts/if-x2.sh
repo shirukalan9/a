@@ -14,7 +14,7 @@ repo init -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mip
 #---------------------------------------------------
 # Device 
 git clone -b ${BRANCH_DT} https://github.com/testingprjct/8dua device/infinix/X6882
-git clone --depth=1 -b ${BRANCH_VT} https://github.com/testingprjct/eks8dua vendor_infinix_X6882 vendor/infinix/X6882
+git clone --depth=1 -b ${BRANCH_VT} https://github.com/testingprjct/eks8dua vendor/infinix/X6882
 git clone --depth=1 https://github.com/zaidannn7/device_infinix_X6882-kernel device/infinix/X6882-kernel
 #----------------------------------------------------
 # Mediatek Specific
