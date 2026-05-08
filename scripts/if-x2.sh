@@ -14,7 +14,7 @@ repo init -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mip
 #---------------------------------------------------
 # Device 
 git clone -b ${BRANCH_DT} https://github.com/testingprjct/8dua device/infinix/X6882
-git clone --depth=1 -b ${BRANCH_VT} https://gitlab.com/testingprjct/eks8dua vendor_infinix_X6882 vendor/infinix/X6882
+git clone --depth=1 -b ${BRANCH_VT} https://github.com/testingprjct/eks8dua vendor_infinix_X6882 vendor/infinix/X6882
 git clone --depth=1 https://github.com/zaidannn7/device_infinix_X6882-kernel device/infinix/X6882-kernel
 #----------------------------------------------------
 # Mediatek Specific
@@ -28,6 +28,11 @@ export BUILD_USERNAME=zaidannn7
 export BUILD_HOSTNAME=android
 export KBUILD_BUILD_NAME=zaidannn7
 export KBUILD_BUILD_HOST=android
+
+cd build/tools
+wget -qO- https://github.com/Evolution-X/build/commit/d2817e9ad6a34ad08325742338f513ee5af2fa89.diff | git apply
+wget -qO- https://github.com/Evolution-X/build/commit/a8297166097f37cf2ddfb39cf0a84b289bd0a33e.diff | git apply
+cd ../..
 
 # Build
 source build/envsetup.sh
