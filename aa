@@ -1,0 +1,2026 @@
+diff --git a/core/java/android/app/ActivityThread.java b/core/java/android/app/ActivityThread.java
+index 97611d50e751b..69eecbab36e54 100644
+--- a/core/java/android/app/ActivityThread.java
++++ b/core/java/android/app/ActivityThread.java
+@@ -8526,11 +8526,6 @@ public IContentProvider acquireProvider(
+             }
+         }
+         if (holder == null) {
+-            if (UserManager.get(c).isUserUnlocked(userId)) {
+-                Slog.e(TAG, "Failed to find provider info for " + auth);
+-            } else {
+-                Slog.w(TAG, "Failed to find provider info for " + auth + " (user not unlocked)");
+-            }
+             return null;
+         }
+ 
+diff --git a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+index 7fb8a00189b91..7ffeb5b0e1160 100644
+--- a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
++++ b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+@@ -346,7 +346,6 @@ public boolean isGranted(@NonNull String permission, @NonNull PackageInfo pkg,
+                 return mContext.getPackageManager().getPackageInfo(pkg,
+                         DEFAULT_PACKAGE_INFO_QUERY_FLAGS);
+             } catch (NameNotFoundException e) {
+-                Slog.e(TAG, "Package not found: " + pkg);
+                 return null;
+             }
+         }
+diff --git a/services/core/java/com/android/server/am/ActiveServices.java b/services/core/java/com/android/server/am/ActiveServices.java
+index 253232b97944f..40423ab322811 100644
+--- a/services/core/java/com/android/server/am/ActiveServices.java
++++ b/services/core/java/com/android/server/am/ActiveServices.java
+@@ -1106,7 +1106,7 @@ && appRestrictedAnyInBackground(appUid, appPackageName)
+             final int allowed = mAm.getAppStartModeLOSP(appUid, appPackageName, appTargetSdkVersion,
+                     callingPid, false, false, forcedStandby);
+             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+-                Slog.w(TAG, "Background start not allowed: service "
++                Slog.v(TAG, "Background start not allowed: service "
+                         + service + " to " + r.shortInstanceName
+                         + " from pid=" + callingPid + " uid=" + callingUid
+                         + " pkg=" + callingPackage + " startFg?=" + fgRequired);
+diff --git a/core/java/android/view/ViewDebug.java b/core/java/android/view/ViewDebug.java
+index 05970aeb52aae..17356d04f64ef 100644
+--- a/core/java/android/view/ViewDebug.java
++++ b/core/java/android/view/ViewDebug.java
+@@ -1929,7 +1929,7 @@ public static void setLayoutParameter(final View view, final String param, final
+                     + param + " is of type " + f.getType().getSimpleName());
+         }
+ 
+-        f.set(p, Integer.valueOf(value));
++        f.setInt(p, value);
+ 
+         view.post(new Runnable() {
+             @Override
+diff --git a/services/core/java/com/android/server/tv/TvInputManagerService.java b/services/core/java/com/android/server/tv/TvInputManagerService.java
+index e000d6f45f767..c7324c4ad34b8 100644
+--- a/services/core/java/com/android/server/tv/TvInputManagerService.java
++++ b/services/core/java/com/android/server/tv/TvInputManagerService.java
+@@ -3110,7 +3110,7 @@ protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args)
+                 pw.increaseIndent();
+                 for (int i = 0; i < mUserStates.size(); i++) {
+                     int userId = mUserStates.keyAt(i);
+-                    pw.println(Integer.valueOf(userId));
++                    pw.println(userId);
+                 }
+                 pw.decreaseIndent();
+ 
+diff --git a/cmds/hid/jni/com_android_commands_hid_Device.cpp b/cmds/hid/jni/com_android_commands_hid_Device.cpp
+index a142450ac0c67..153f7c37467a2 100644
+--- a/cmds/hid/jni/com_android_commands_hid_Device.cpp
++++ b/cmds/hid/jni/com_android_commands_hid_Device.cpp
+@@ -380,7 +380,7 @@ static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
+     }
+ }
+ 
+-static JNINativeMethod sMethods[] = {
++static const JNINativeMethod sMethods[] = {
+         {"nativeOpenDevice",
+          "(Ljava/lang/String;Ljava/lang/String;IIII[B"
+          "Lcom/android/commands/hid/Device$DeviceCallback;)J",
+diff --git a/cmds/uinput/jni/com_android_commands_uinput_Device.cpp b/cmds/uinput/jni/com_android_commands_uinput_Device.cpp
+index bd61000186e5a..3179c8a28e479 100644
+--- a/cmds/uinput/jni/com_android_commands_uinput_Device.cpp
++++ b/cmds/uinput/jni/com_android_commands_uinput_Device.cpp
+@@ -325,7 +325,7 @@ static jint getEvdevInputPropByLabel(JNIEnv* env, jclass /* clazz */, jstring ra
+     return InputEventLookup::getLinuxEvdevInputPropByLabel(label.c_str()).value_or(-1);
+ }
+ 
+-static JNINativeMethod sMethods[] = {
++static const JNINativeMethod sMethods[] = {
+         {"nativeOpenUinputDevice",
+          "(Ljava/lang/String;IIIIIILjava/lang/String;"
+          "Lcom/android/commands/uinput/Device$DeviceCallback;)J",
+diff --git a/core/jni/android_app_ActivityThread.cpp b/core/jni/android_app_ActivityThread.cpp
+index e25ba76cbbeb6..16a8d4656179a 100644
+--- a/core/jni/android_app_ActivityThread.cpp
++++ b/core/jni/android_app_ActivityThread.cpp
+@@ -33,7 +33,7 @@ static void android_app_ActivityThread_initZygoteChildHeapProfiling(JNIEnv* env,
+     android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
+ }
+ 
+-static JNINativeMethod gActivityThreadMethods[] = {
++static const JNINativeMethod gActivityThreadMethods[] = {
+     // ------------ Regular JNI ------------------
+     { "nPurgePendingResources",        "()V",
+       (void*) android_app_ActivityThread_purgePendingResources },
+diff --git a/core/jni/android_media_ImageWriter.cpp b/core/jni/android_media_ImageWriter.cpp
+index 8e58922bd9df2..04fc93a623441 100644
+--- a/core/jni/android_media_ImageWriter.cpp
++++ b/core/jni/android_media_ImageWriter.cpp
+@@ -1124,7 +1124,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
+ 
+ // ----------------------------------------------------------------------------
+ 
+-static JNINativeMethod gImageWriterMethods[] = {
++static const JNINativeMethod gImageWriterMethods[] = {
+     {"nativeClassInit",         "()V",                        (void*)ImageWriter_classInit },
+     {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIIZIIJ)J",
+                                                               (void*)ImageWriter_init },
+@@ -1141,7 +1141,7 @@ static JNINativeMethod gImageWriterMethods[] = {
+     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },
+ };
+ 
+-static JNINativeMethod gImageMethods[] = {
++static const JNINativeMethod gImageMethods[] = {
+     {"nativeCreatePlanes",      "(II)[Landroid/media/ImageWriter$WriterSurfaceImage$SurfacePlane;",
+                                                                (void*)Image_createSurfacePlanes },
+     {"nativeGetWidth",          "()I",                         (void*)Image_getWidth },
+diff --git a/core/jni/android_os_HidlMemory.cpp b/core/jni/android_os_HidlMemory.cpp
+index 69e48184c0ad3..612fc95776a56 100644
+--- a/core/jni/android_os_HidlMemory.cpp
++++ b/core/jni/android_os_HidlMemory.cpp
+@@ -50,7 +50,7 @@ static void nativeFinalize(JNIEnv* env, jobject jobj) {
+     delete native;
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+         {"nativeFinalize", "()V", (void*) nativeFinalize},
+ };
+ 
+diff --git a/core/jni/android_os_HwBinder.cpp b/core/jni/android_os_HwBinder.cpp
+index 8060e62324821..aa78d814e0c99 100644
+--- a/core/jni/android_os_HwBinder.cpp
++++ b/core/jni/android_os_HwBinder.cpp
+@@ -397,7 +397,7 @@ static void JHwBinder_report_sysprop_change(JNIEnv * /*env*/, jclass /*clazz*/)
+     report_sysprop_change();
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     { "native_init", "()J", (void *)JHwBinder_native_init },
+     { "native_setup", "()V", (void *)JHwBinder_native_setup },
+ 
+diff --git a/core/jni/android_os_HwBlob.cpp b/core/jni/android_os_HwBlob.cpp
+index df579af0acb44..28459e6275a7e 100644
+--- a/core/jni/android_os_HwBlob.cpp
++++ b/core/jni/android_os_HwBlob.cpp
+@@ -600,7 +600,7 @@ static jlong JHwBlob_native_handle(JNIEnv *env, jobject thiz) {
+     return handle;
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     { "native_init", "()J", (void *)JHwBlob_native_init },
+     { "native_setup", "(I)V", (void *)JHwBlob_native_setup },
+ 
+diff --git a/core/jni/android_os_HwParcel.cpp b/core/jni/android_os_HwParcel.cpp
+index 727455c21e028..969b19fe6fe0a 100644
+--- a/core/jni/android_os_HwParcel.cpp
++++ b/core/jni/android_os_HwParcel.cpp
+@@ -1072,7 +1072,7 @@ static void JHwParcel_native_writeBuffer(
+     }
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     { "native_init", "()J", (void *)JHwParcel_native_init },
+     { "native_setup", "(Z)V", (void *)JHwParcel_native_setup },
+ 
+diff --git a/core/jni/android_os_HwRemoteBinder.cpp b/core/jni/android_os_HwRemoteBinder.cpp
+index 3b567092f6a60..9027e6b3376fe 100644
+--- a/core/jni/android_os_HwRemoteBinder.cpp
++++ b/core/jni/android_os_HwRemoteBinder.cpp
+@@ -453,7 +453,7 @@ static jint JHwRemoteBinder_hashCode(JNIEnv* env, jobject thiz) {
+     return static_cast<jint>(longHash ^ (longHash >> 32)); // See Long.hashCode()
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     { "native_init", "()J", (void *)JHwRemoteBinder_native_init },
+ 
+     { "native_setup_empty", "()V",
+diff --git a/core/jni/platform/host/HostRuntime.cpp b/core/jni/platform/host/HostRuntime.cpp
+index 4f929b1ce2bcd..ae748c972c626 100644
+--- a/core/jni/platform/host/HostRuntime.cpp
++++ b/core/jni/platform/host/HostRuntime.cpp
+@@ -63,7 +63,7 @@ static void NativeAllocationRegistry_applyFreeFunction(JNIEnv*, jclass, jlong fr
+     nativeFreeFunction(nativePtr);
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+         NATIVE_METHOD(NativeAllocationRegistry, applyFreeFunction, "(JJ)V"),
+ };
+ 
+diff --git a/libs/hwui/jni/android_graphics_DisplayListCanvas.cpp b/libs/hwui/jni/android_graphics_DisplayListCanvas.cpp
+index cf47cf08b0c98..e21545a1d326e 100644
+--- a/libs/hwui/jni/android_graphics_DisplayListCanvas.cpp
++++ b/libs/hwui/jni/android_graphics_DisplayListCanvas.cpp
+@@ -167,7 +167,7 @@ static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAM
+ 
+ const char* const kClassPathName = "android/graphics/RecordingCanvas";
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+         {"nGetMaximumTextureWidth", "()I", (void*)android_view_DisplayListCanvas_getMaxTextureSize},
+         {"nGetMaximumTextureHeight", "()I",
+          (void*)android_view_DisplayListCanvas_getMaxTextureSize},
+diff --git a/media/jni/android_media_MediaSync.cpp b/media/jni/android_media_MediaSync.cpp
+index d1ce30a3e8278..d93bda166c441 100644
+--- a/media/jni/android_media_MediaSync.cpp
++++ b/media/jni/android_media_MediaSync.cpp
+@@ -514,7 +514,7 @@ static void android_media_MediaSync_native_finalize(JNIEnv *env, jobject thiz) {
+     android_media_MediaSync_release(env, thiz);
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     { "native_setSurface",
+       "(Landroid/view/Surface;)V",
+       (void *)android_media_MediaSync_native_setSurface },
+diff --git a/media/jni/soundpool/android_media_SoundPool.cpp b/media/jni/soundpool/android_media_SoundPool.cpp
+index e872a58c96cf7..fd6fb80d68675 100644
+--- a/media/jni/soundpool/android_media_SoundPool.cpp
++++ b/media/jni/soundpool/android_media_SoundPool.cpp
+@@ -563,7 +563,7 @@ android_media_SoundPool_release(JNIEnv *env, jobject thiz)
+ // ----------------------------------------------------------------------------
+ 
+ // Dalvik VM type signatures
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     {   "_load",
+         "(Ljava/io/FileDescriptor;JJI)I",
+         (void *)android_media_SoundPool_load_FD
+diff --git a/ravenwood/runtime-jni/ravenwood_os_constants.cpp b/ravenwood/runtime-jni/ravenwood_os_constants.cpp
+index ea6c9d4766b68..39c9e3e94c9e3 100644
+--- a/ravenwood/runtime-jni/ravenwood_os_constants.cpp
++++ b/ravenwood/runtime-jni/ravenwood_os_constants.cpp
+@@ -756,7 +756,7 @@ static void OsConstants_initConstants(JNIEnv* env, jclass) {
+     initConstant(env, c, "_SC_XOPEN_XCU_VERSION", _SC_XOPEN_XCU_VERSION);
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+     NATIVE_METHOD(OsConstants, initConstants, "()V"),
+ };
+ 
+diff --git a/services/core/jni/com_android_server_UsbAlsaDevice.cpp b/services/core/jni/com_android_server_UsbAlsaDevice.cpp
+index 166932f167ede..d3e9af1916ee3 100644
+--- a/services/core/jni/com_android_server_UsbAlsaDevice.cpp
++++ b/services/core/jni/com_android_server_UsbAlsaDevice.cpp
+@@ -59,7 +59,7 @@ static void android_server_UsbAlsaDevice_setVolume(JNIEnv* /*env*/, jobject /*th
+     ALOGD("%s(%d, %f) succeed", __func__, card, volume);
+ }
+ 
+-static JNINativeMethod method_table[] = {
++static const JNINativeMethod method_table[] = {
+         {"nativeSetVolume", "(IF)V", (void*)android_server_UsbAlsaDevice_setVolume},
+ };
+ 
+diff --git a/services/core/jni/com_android_server_UsbAlsaMidiDevice.cpp b/services/core/jni/com_android_server_UsbAlsaMidiDevice.cpp
+index 93938b1ff1bc5..47b22c5fd39fa 100644
+--- a/services/core/jni/com_android_server_UsbAlsaMidiDevice.cpp
++++ b/services/core/jni/com_android_server_UsbAlsaMidiDevice.cpp
+@@ -138,7 +138,7 @@ static void android_server_UsbAlsaMidiDevice_close(JNIEnv *env, jobject thiz, jo
+     }
+ }
+ 
+-static JNINativeMethod method_table[] = {
++static const JNINativeMethod method_table[] = {
+         {"nativeOpen", "(IIII)[Ljava/io/FileDescriptor;",
+          (void *)android_server_UsbAlsaMidiDevice_open},
+         {"nativeClose", "([Ljava/io/FileDescriptor;)V",
+diff --git a/services/core/jni/com_android_server_input_VirtualInputDeviceController.cpp b/services/core/jni/com_android_server_input_VirtualInputDeviceController.cpp
+index 2fbc3a0b9ca08..21aa3b5b9b711 100644
+--- a/services/core/jni/com_android_server_input_VirtualInputDeviceController.cpp
++++ b/services/core/jni/com_android_server_input_VirtualInputDeviceController.cpp
+@@ -159,7 +159,7 @@ static bool nativeWriteRotaryEncoderScrollEvent(JNIEnv* env, jobject thiz, jlong
+                                                   std::chrono::nanoseconds(eventTimeNanos));
+ }
+ 
+-static JNINativeMethod methods[] = {
++static const JNINativeMethod methods[] = {
+         {"nativeOpenUinputDpad", "(Ljava/lang/String;IILjava/lang/String;)J",
+          (void*)nativeOpenUinputDpad},
+         {"nativeOpenUinputKeyboard", "(Ljava/lang/String;IILjava/lang/String;)J",
+diff --git a/services/core/jni/com_android_server_tv_TvUinputBridge.cpp b/services/core/jni/com_android_server_tv_TvUinputBridge.cpp
+index 99deab4fd652c..2cb1aaef13fa1 100644
+--- a/services/core/jni/com_android_server_tv_TvUinputBridge.cpp
++++ b/services/core/jni/com_android_server_tv_TvUinputBridge.cpp
+@@ -534,7 +534,7 @@ static void nativeClear(JNIEnv* env, jclass clazz, jlong ptr) {
+  * JNI registration
+  */
+ 
+-static JNINativeMethod gUinputBridgeMethods[] = {
++static const JNINativeMethod gUinputBridgeMethods[] = {
+         {"nativeOpen", "(Ljava/lang/String;Ljava/lang/String;III)J", (void*)nativeOpen},
+         {"nativeGamepadOpen", "(Ljava/lang/String;Ljava/lang/String;)J", (void*)nativeGamepadOpen},
+         {"nativeClose", "(J)V", (void*)nativeClose},
+diff --git a/tests/ChoreographerTests/jni/android_view_tests_ChoreographerNativeTest.cpp b/tests/ChoreographerTests/jni/android_view_tests_ChoreographerNativeTest.cpp
+index 27f4bae9e65a2..b5620251d41b1 100644
+--- a/tests/ChoreographerTests/jni/android_view_tests_ChoreographerNativeTest.cpp
++++ b/tests/ChoreographerTests/jni/android_view_tests_ChoreographerNativeTest.cpp
+@@ -151,7 +151,7 @@ static void android_view_ChoreographerNativeTest_testPostVsyncCallbackAtFrameRat
+     endTest(env, clazz);
+ }
+ 
+-static JNINativeMethod gMethods[] = {
++static const JNINativeMethod gMethods[] = {
+         {"nativeSurfaceControl_getChoreographer", "(Landroid/view/SurfaceControl;)J",
+          (void*)SurfaceControl_getChoreographer},
+         {"nativeTestPostVsyncCallbackAtFrameRate", "(JF)V",
+diff --git a/services/core/java/com/android/server/power/stats/KernelWakelockReader.java b/services/core/java/com/android/server/power/stats/KernelWakelockReader.java
+index 3fffcf713c310..aa1c777e79eb4 100644
+--- a/services/core/java/com/android/server/power/stats/KernelWakelockReader.java
++++ b/services/core/java/com/android/server/power/stats/KernelWakelockReader.java
+@@ -84,7 +84,7 @@ public KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStat
+                 // Get both kernel and native wakelock stats from SystemSuspend
+                 updateVersion(staleStats);
+                 if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
+-                    Slog.w(TAG, "Failed to get wakelock stats from SystemSuspend");
++                    Slog.d(TAG, "Failed to get wakelock stats from SystemSuspend");
+                     return null;
+                 }
+                 return removeOldStats(staleStats);
+@@ -106,7 +106,7 @@ public KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStat
+                         is = new FileInputStream(sWakeupSourceFile);
+                         wakeup_sources = true;
+                     } catch (java.io.FileNotFoundException e2) {
+-                        Slog.wtf(TAG, "neither " + sWakelockFile + " nor " +
++                        Slog.d(TAG, "neither " + sWakelockFile + " nor " +
+                                 sWakeupSourceFile + " exists");
+                         return null;
+                     }
+diff --git a/services/permission/java/com/android/server/permission/access/appop/AppOpService.kt b/services/permission/java/com/android/server/permission/access/appop/AppOpService.kt
+index 73f1033f36cff..6fdf97bf0e282 100644
+--- a/services/permission/java/com/android/server/permission/access/appop/AppOpService.kt
++++ b/services/permission/java/com/android/server/permission/access/appop/AppOpService.kt
+@@ -269,11 +269,6 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
+                     " mode = ${AppOpsManager.modeToName(mode)}," +
+                     " callingUid = ${Binder.getCallingUid()}," +
+                     " oldMode = ${AppOpsManager.modeToName(oldMode)}"
+-            if (wouldHaveChanged) {
+-                Slog.e(LOG_TAG, logMessage, RuntimeException())
+-            } else {
+-                Slog.w(LOG_TAG, logMessage)
+-            }
+             return false
+         }
+ 
+diff --git a/media/java/android/media/MediaPlayer.java b/media/java/android/media/MediaPlayer.java
+index f17675b03348a..f86ea3547933c 100644
+--- a/media/java/android/media/MediaPlayer.java
++++ b/media/java/android/media/MediaPlayer.java
+@@ -3637,7 +3637,7 @@ public void handleMessage(Message msg) {
+                 return;
+ 
+             case MEDIA_ERROR:
+-                Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
++                Log.v(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                 boolean error_was_handled = false;
+                 OnErrorListener onErrorListener = mOnErrorListener;
+                 if (onErrorListener != null) {
+diff --git a/packages/SystemUI/src/com/android/systemui/window/ui/WindowRootViewBinder.kt b/packages/SystemUI/src/com/android/systemui/window/ui/WindowRootViewBinder.kt
+index a0867e322088a..ea0ca8edff775 100644
+--- a/packages/SystemUI/src/com/android/systemui/window/ui/WindowRootViewBinder.kt
++++ b/packages/SystemUI/src/com/android/systemui/window/ui/WindowRootViewBinder.kt
+@@ -114,7 +114,7 @@ object WindowRootViewBinder {
+                                         lastScheduledBlurRadius != newBlurRadius ||
+                                             lastScheduledBlurScale != newBlurScale
+                                     ) {
+-                                        Log.w(TAG, "Multiple blur values emitted in the same frame")
++                                        Log.d(TAG, "Multiple blur values emitted in the same frame")
+                                     }
+                                     lastScheduledBlurRadius = newBlurRadius
+                                     lastScheduledBlurScale = newBlurScale
+diff --git a/packages/SystemUI/src-debug/com/android/systemui/log/DebugLogger.kt b/packages/SystemUI/src-debug/com/android/systemui/log/DebugLogger.kt
+index 8d1de0e65da54..6c41458ec9941 100644
+--- a/packages/SystemUI/src-debug/com/android/systemui/log/DebugLogger.kt
++++ b/packages/SystemUI/src-debug/com/android/systemui/log/DebugLogger.kt
+@@ -71,12 +71,5 @@ object DebugLogger {
+         error: Throwable? = null,
+         message: () -> String,
+     ) {
+-        if (enabled) {
+-            if (error == null) {
+-                Log.println(priority, tag, message())
+-            } else {
+-                Log.printlns(LOG_ID_MAIN, priority, tag, message(), error)
+-            }
+-        }
+     }
+ }
+diff --git a/core/java/android/app/ResourcesManager.java b/core/java/android/app/ResourcesManager.java
+index 523849e6914ca..f2939324afaa2 100644
+--- a/core/java/android/app/ResourcesManager.java
++++ b/core/java/android/app/ResourcesManager.java
+@@ -1782,7 +1782,7 @@ private void appendLibAssetsLocked(@NonNull SharedLibraryAssets libAssets) {
+             final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+             final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+             if (impl == null) {
+-                Slog.w(TAG, "Found a null ResourcesImpl, skipped.");
++                if (DEBUG) Slog.w(TAG, "Found a null ResourcesImpl, skipped.");
+                 continue;
+             }
+ 
+diff --git a/packages/SystemUI/compose/scene/src/com/android/compose/animation/scene/SceneTransitionLayoutState.kt b/packages/SystemUI/compose/scene/src/com/android/compose/animation/scene/SceneTransitionLayoutState.kt
+index 4225cb92513de..9168b2c9e8bcc 100644
+--- a/packages/SystemUI/compose/scene/src/com/android/compose/animation/scene/SceneTransitionLayoutState.kt
++++ b/packages/SystemUI/compose/scene/src/com/android/compose/animation/scene/SceneTransitionLayoutState.kt
+@@ -463,7 +463,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
+     }
+ 
+     override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
+-        Log.i(TAG, "startTransition(transition=$transition, chain=$chain)")
++        Log.d(TAG, "startTransition(transition=$transition, chain=$chain)")
+         checkThread()
+ 
+         // Prepare the transition before starting it. This is outside of the try/finally block on
+@@ -575,7 +575,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
+             return
+         }
+ 
+-        Log.i(TAG, "finishTransition(transition=$transition)")
++        Log.d(TAG, "finishTransition(transition=$transition)")
+         check(transitionStates.fastAll { it is TransitionState.Transition })
+ 
+         // Mark this transition as finished.
+@@ -598,7 +598,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
+         }
+ 
+         val idle = TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
+-        Log.i(TAG, "all transitions finished. idle=$idle")
++        Log.d(TAG, "all transitions finished. idle=$idle")
+         finishedTransitions.clear()
+         this.transitionStates = listOf(idle)
+     }
+diff --git a/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java b/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java
+index fdca70849b689..855512c2c7e3c 100644
+--- a/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java
++++ b/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java
+@@ -28,21 +28,21 @@
+ public enum ShellProtoLogGroup implements IProtoLogGroup {
+     // NOTE: Since we enable these from the same WM ShellCommand, these names should not conflict
+     // with those in the framework ProtoLogGroup
+-    WM_SHELL(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
++    WM_SHELL(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             Consts.TAG_WM_SHELL),
+-    WM_SHELL_INIT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
++    WM_SHELL_INIT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             Consts.TAG_WM_SHELL),
+     WM_SHELL_TASK_ORG(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
+             "ShellTaskOrganizer"),
+     WM_SHELL_TASK_ORG_NOISY(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             "ShellTaskOrganizer"),
+-    WM_SHELL_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
++    WM_SHELL_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             Consts.TAG_WM_SHELL),
+     WM_SHELL_IME_CONTROLLER(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             "ShellIme"),
+-    WM_SHELL_RECENTS_TRANSITION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
++    WM_SHELL_RECENTS_TRANSITION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             "ShellRecents"),
+-    WM_SHELL_DRAG_AND_DROP(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
++    WM_SHELL_DRAG_AND_DROP(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             "ShellDragAndDrop"),
+     WM_SHELL_STARTING_WINDOW(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+             Consts.TAG_WM_STARTING_WINDOW),
+diff --git a/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java b/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
+index 8fabb3a26bf0a..0c26d224ffe29 100644
+--- a/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
++++ b/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
+@@ -443,7 +443,7 @@ public AconfigdFlagInfo getFlagOverrideToSync(
+         // get package name and flag name
+         int dotIdx = fullFlagName.lastIndexOf(".");
+         if (dotIdx == -1) {
+-            Slog.e(LOG_TAG, "invalid override flag name " + name);
++            Slog.w(LOG_TAG, "invalid override flag name " + name);
+             return null;
+         }
+         AconfigdFlagInfo flag = flagInfoDefault.get(fullFlagName);
+diff --git a/core/java/com/android/internal/pm/pkg/component/AconfigFlags.java b/core/java/com/android/internal/pm/pkg/component/AconfigFlags.java
+index 7503fb1f99133..1a7733a90419d 100644
+--- a/core/java/com/android/internal/pm/pkg/component/AconfigFlags.java
++++ b/core/java/com/android/internal/pm/pkg/component/AconfigFlags.java
+@@ -264,7 +264,6 @@ private Boolean getFlagValueFromNewStorage(String flagPackageAndName) {
+             try {
+                 return AconfigPackage.load(p);
+             } catch (Exception e) {
+-                Slog.e(LOG_TAG, "Failed to load aconfig package " + p, e);
+                 return null;
+             }
+         });
+diff --git a/core/java/com/android/internal/os/KernelCpuUidTimeReader.java b/core/java/com/android/internal/os/KernelCpuUidTimeReader.java
+index 21e0dc59db01d..b0b9c2cfddb4a 100644
+--- a/core/java/com/android/internal/os/KernelCpuUidTimeReader.java
++++ b/core/java/com/android/internal/os/KernelCpuUidTimeReader.java
+@@ -452,7 +452,7 @@ private void processUidDelta(@Nullable Callback<long[]> cb) {
+                 // Unit is 10ms.
+                 mDeltaTimes[i] = mCurTimes[i] - lastTimes[i];
+                 if (mDeltaTimes[i] < 0) {
+-                    Slog.e(mTag, "Negative delta from freq time for uid: " + uid
++                    if (DEBUG) Slog.e(mTag, "Negative delta from freq time for uid: " + uid
+                             + ", delta: " + mDeltaTimes[i]);
+                     return;
+                 }
+@@ -628,7 +628,7 @@ private void processUidDelta(@Nullable Callback<Long> cb) {
+                         cb.onUidCpuTime(uid, delta);
+                     }
+                 } else if (delta < 0) {
+-                    Slog.e(mTag, "Negative delta from active time for uid: " + uid
++                    if (DEBUG) Slog.e(mTag, "Negative delta from active time for uid: " + uid
+                             + ", delta: " + delta);
+                 }
+             }
+diff --git a/core/java/android/window/SplashScreenView.java b/core/java/android/window/SplashScreenView.java
+index ea0d6b8c69344..1317ae6ae09a0 100644
+--- a/core/java/android/window/SplashScreenView.java
++++ b/core/java/android/window/SplashScreenView.java
+@@ -81,7 +81,7 @@
+  */
+ public final class SplashScreenView extends FrameLayout {
+     private static final String TAG = SplashScreenView.class.getSimpleName();
+-    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
++    private static final boolean DEBUG = false;
+ 
+     private boolean mNotCopyable;
+     private boolean mIsCopied;
+diff --git a/services/core/java/com/android/server/pm/dex/ArtManagerService.java b/services/core/java/com/android/server/pm/dex/ArtManagerService.java
+index b67b3fa7b0e2c..a63c42edb7d07 100644
+--- a/services/core/java/com/android/server/pm/dex/ArtManagerService.java
++++ b/services/core/java/com/android/server/pm/dex/ArtManagerService.java
+@@ -73,7 +73,7 @@
+  */
+ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
+     private static final String TAG = "ArtManagerService";
+-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
++    private static final boolean DEBUG = false;
+ 
+     private final Context mContext;
+     private IPackageManager mPackageManager;
+@@ -267,7 +267,7 @@ public boolean isRuntimeProfilingEnabled(@ProfileType int profileType, String ca
+                 boolean profileBootClassPath = SystemProperties.getBoolean(
+                         "persist.device_config.runtime_native_boot.profilebootclasspath",
+                         SystemProperties.getBoolean("dalvik.vm.profilebootclasspath", false));
+-                return (Build.IS_USERDEBUG || Build.IS_ENG) && profileBootClassPath;
++                return (Build.IS_ENG) && profileBootClassPath;
+             default:
+                 throw new IllegalArgumentException("Invalid profile type:" + profileType);
+         }
+diff --git a/services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java b/services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java
+index 3b197d30e59af..c3425c3ade43a 100644
+--- a/services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java
++++ b/services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java
+@@ -199,7 +199,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
+     // Name of the tag associated with the system logs generated by this service.
+     private static final String TAG = "AppWidgetServiceImpl";
+     // Simple flag to enable/disable debug logging.
+-    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
++    private static final boolean DEBUG = false;
+ 
+     // Filename for app widgets state persisted on disk.
+     private static final String STATE_FILENAME = "appwidgets.xml";
+diff --git a/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java b/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
+index 4224338918f41..ea9dfc1ac0068 100644
+--- a/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
++++ b/telephony/common/com/android/internal/telephony/util/TelephonyUtils.java
+@@ -61,8 +61,8 @@ public final class TelephonyUtils {
+     private static final String LOG_TAG = "TelephonyUtils";
+ 
+     public static final boolean FORCE_VERBOSE_STATE_LOGGING = false; /* stopship if true */
+-    public static boolean IS_USER = "user".equals(android.os.Build.TYPE);
+-    public static boolean IS_DEBUGGABLE = SystemProperties.getInt("ro.debuggable", 0) == 1;
++    public static boolean IS_USER = true;
++    public static boolean IS_DEBUGGABLE = false;
+ 
+     public static final Executor DIRECT_EXECUTOR = Runnable::run;
+ 
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationMenuRow.java b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationMenuRow.java
+index 1b2e65c5dcabb..28379ac5aef2a 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationMenuRow.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationMenuRow.java
+@@ -961,7 +961,7 @@ public NotificationMenuItem(Context context, String contentDescription, GutsCont
+             if (iconResId >= 0) {
+                 AlphaOptimizedImageView iv = new AlphaOptimizedImageView(context);
+                 iv.setPadding(padding, padding, padding, padding);
+-                Drawable icon = context.getResources().getDrawable(iconResId);
++                Drawable icon = context.getDrawable(iconResId);
+                 iv.setImageDrawable(icon);
+                 iv.setColorFilter(tint);
+                 iv.setAlpha(1f);
+diff --git a/apex/jobscheduler/service/java/com/android/server/job/JobSchedulerService.java b/apex/jobscheduler/service/java/com/android/server/job/JobSchedulerService.java
+index 54b9e6a43023c..dbaa420507c15 100644
+--- a/apex/jobscheduler/service/java/com/android/server/job/JobSchedulerService.java
++++ b/apex/jobscheduler/service/java/com/android/server/job/JobSchedulerService.java
+@@ -180,8 +180,8 @@
+ public class JobSchedulerService extends com.android.server.SystemService
+         implements StateChangedListener, JobCompletedListener {
+     public static final String TAG = "JobScheduler";
+-    public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+-    public static final boolean DEBUG_STANDBY = DEBUG || false;
++    public static final boolean DEBUG = false;
++    public static final boolean DEBUG_STANDBY = false;
+ 
+     public static final String TRACE_TRACK_NAME = "JobScheduler";
+ 
+diff --git a/core/java/android/util/TimingsTraceLog.java b/core/java/android/util/TimingsTraceLog.java
+index b4f4729c82b27..9c3a02a5d3ead 100644
+--- a/core/java/android/util/TimingsTraceLog.java
++++ b/core/java/android/util/TimingsTraceLog.java
+@@ -37,7 +37,7 @@
+ @android.ravenwood.annotation.RavenwoodKeepWholeClass
+ public class TimingsTraceLog {
+     // Debug boot time for every step if it's non-user build.
+-    private static final boolean DEBUG_BOOT_TIME = !Build.IS_USER;
++    private static final boolean DEBUG_BOOT_TIME = false;
+ 
+     // Maximum number of nested calls that are stored
+     private static final int MAX_NESTED_CALLS = 10;
+diff --git a/core/java/com/android/internal/os/ZygoteInit.java b/core/java/com/android/internal/os/ZygoteInit.java
+index e90b277f5eef0..53c03fbb6d66f 100644
+--- a/core/java/com/android/internal/os/ZygoteInit.java
++++ b/core/java/com/android/internal/os/ZygoteInit.java
+@@ -91,7 +91,7 @@ public class ZygoteInit {
+ 
+     private static final String TAG = "Zygote";
+ 
+-    private static final boolean LOGGING_DEBUG = Log.isLoggable(TAG, Log.DEBUG);
++    private static final boolean LOGGING_DEBUG = false;
+ 
+     private static final String PROPERTY_DISABLE_GRAPHICS_DRIVER_PRELOADING =
+             "ro.zygote.disable_gl_preload";
+diff --git a/cmds/incidentd/src/WorkDirectory.cpp b/cmds/incidentd/src/WorkDirectory.cpp
+index 5c5d5f4b52e52..7180af3f99b5b 100644
+--- a/cmds/incidentd/src/WorkDirectory.cpp
++++ b/cmds/incidentd/src/WorkDirectory.cpp
+@@ -569,7 +569,7 @@ sp<ReportFile> WorkDirectory::createReportFile() {
+ status_t WorkDirectory::getReports(vector<sp<ReportFile>>* result, int64_t after) {
+     unique_lock<mutex> lock(mLock);
+ 
+-    const bool DBG = true;
++    const bool DBG = false;
+ 
+     if (DBG) {
+         ALOGD("WorkDirectory::getReports");
+diff --git a/core/java/android/net/SntpClient.java b/core/java/android/net/SntpClient.java
+index 0fb04b9d7299f..5797299821559 100644
+--- a/core/java/android/net/SntpClient.java
++++ b/core/java/android/net/SntpClient.java
+@@ -56,7 +56,7 @@
+  */
+ public class SntpClient {
+     private static final String TAG = "SntpClient";
+-    private static final boolean DBG = true;
++    private static final boolean DBG = false;
+ 
+     private static final int REFERENCE_TIME_OFFSET = 16;
+     private static final int ORIGINATE_TIME_OFFSET = 24;
+diff --git a/core/java/com/android/internal/util/AsyncService.java b/core/java/com/android/internal/util/AsyncService.java
+index 58e4a605f88c6..44da8bbf9d2d0 100644
+--- a/core/java/com/android/internal/util/AsyncService.java
++++ b/core/java/com/android/internal/util/AsyncService.java
+@@ -35,7 +35,7 @@
+ abstract public class AsyncService extends Service {
+     private static final String TAG = "AsyncService";
+ 
+-    protected static final boolean DBG = true;
++    protected static final boolean DBG = false;
+ 
+     /** The command sent when a onStartCommand is invoked */
+     public static final int CMD_ASYNC_SERVICE_ON_START_INTENT = IBinder.LAST_CALL_TRANSACTION;
+diff --git a/packages/CarrierDefaultApp/src/com/android/carrierdefaultapp/CaptivePortalLoginActivity.java b/packages/CarrierDefaultApp/src/com/android/carrierdefaultapp/CaptivePortalLoginActivity.java
+index 10d68ba8d5836..5c20ec4602bf0 100644
+--- a/packages/CarrierDefaultApp/src/com/android/carrierdefaultapp/CaptivePortalLoginActivity.java
++++ b/packages/CarrierDefaultApp/src/com/android/carrierdefaultapp/CaptivePortalLoginActivity.java
+@@ -68,7 +68,7 @@
+  */
+ public class CaptivePortalLoginActivity extends Activity {
+     private static final String TAG = CaptivePortalLoginActivity.class.getSimpleName();
+-    private static final boolean DBG = true;
++    private static final boolean DBG = false;
+ 
+     private static final int SOCKET_TIMEOUT_MS = 10 * 1000;
+     private static final int NETWORK_REQUEST_TIMEOUT_MS = 5 * 1000;
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CsipSetCoordinatorProfile.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CsipSetCoordinatorProfile.java
+index 45cafc6bf6cb8..67fd2b3563fbf 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CsipSetCoordinatorProfile.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CsipSetCoordinatorProfile.java
+@@ -42,7 +42,7 @@
+  */
+ public class CsipSetCoordinatorProfile implements LocalBluetoothProfile {
+     private static final String TAG = "CsipSetCoordinatorProfile";
+-    private static final boolean VDBG = true;
++    private static final boolean VDBG = false;
+ 
+     private Context mContext;
+ 
+diff --git a/telephony/java/android/telephony/data/DataServiceCallback.java b/telephony/java/android/telephony/data/DataServiceCallback.java
+index 8287a038c841d..7910e59b16ebf 100644
+--- a/telephony/java/android/telephony/data/DataServiceCallback.java
++++ b/telephony/java/android/telephony/data/DataServiceCallback.java
+@@ -42,7 +42,7 @@ public class DataServiceCallback {
+ 
+     private static final String TAG = DataServiceCallback.class.getSimpleName();
+ 
+-    private static final boolean DBG = true;
++    private static final boolean DBG = false;
+ 
+     /**
+      * Result of data requests
+diff --git a/telephony/java/com/android/ims/ImsConfig.java b/telephony/java/com/android/ims/ImsConfig.java
+index 487786045b8ec..51c20533ad310 100644
+--- a/telephony/java/com/android/ims/ImsConfig.java
++++ b/telephony/java/com/android/ims/ImsConfig.java
+@@ -41,7 +41,7 @@
+ @Deprecated
+ public class ImsConfig {
+     private static final String TAG = "ImsConfig";
+-    private boolean DBG = true;
++    private boolean DBG = false;
+     private final IImsConfig miConfig;
+ 
+     /**
+diff --git a/tests/UsbHostExternalManagmentTest/AoapTestDevice/src/com/android/hardware/usb/aoapdevicetest/UsbAoapDeviceTestActivity.java b/tests/UsbHostExternalManagmentTest/AoapTestDevice/src/com/android/hardware/usb/aoapdevicetest/UsbAoapDeviceTestActivity.java
+index ef179e2da26d8..4c538e3c5dbfb 100644
+--- a/tests/UsbHostExternalManagmentTest/AoapTestDevice/src/com/android/hardware/usb/aoapdevicetest/UsbAoapDeviceTestActivity.java
++++ b/tests/UsbHostExternalManagmentTest/AoapTestDevice/src/com/android/hardware/usb/aoapdevicetest/UsbAoapDeviceTestActivity.java
+@@ -35,7 +35,7 @@
+ 
+ public class UsbAoapDeviceTestActivity extends Activity {
+     private static final String TAG = UsbAoapDeviceTestActivity.class.getSimpleName();
+-    private static final boolean DBG = true;
++    private static final boolean DBG = false;
+ 
+     private static final String ACTION_USB_ACCESSORY_PERMISSION =
+             "com.android.hardware.usb.aoapdevicetest.ACTION_USB_ACCESSORY_PERMISSION";
+diff --git a/core/java/com/android/internal/jank/FrameTracker.java b/core/java/com/android/internal/jank/FrameTracker.java
+index 49f008b465cbb..d78f8af263045 100644
+--- a/core/java/com/android/internal/jank/FrameTracker.java
++++ b/core/java/com/android/internal/jank/FrameTracker.java
+@@ -635,7 +635,7 @@ private void finishTraced() {
+                 // to ignore it for now.
+                 if (mObserver != null && !info.hwuiCallbackFired) {
+                     markEvent("FT#MissedHWUICallback", info.frameVsyncId);
+-                    Log.w(TAG, "Missing HWUI jank callback for vsyncId: " + info.frameVsyncId
++                    Log.v(TAG, "Missing HWUI jank callback for vsyncId: " + info.frameVsyncId
+                             + ", CUJ=" + name);
+                 }
+             }
+@@ -643,7 +643,7 @@ private void finishTraced() {
+                 maxFrameTimeNanos = Math.max(info.totalDurationNanos, maxFrameTimeNanos);
+                 if (!info.surfaceControlCallbackFired) {
+                     markEvent("FT#MissedSFCallback", info.frameVsyncId);
+-                    Log.w(TAG, "Missing SF jank callback for vsyncId: " + info.frameVsyncId
++                    Log.v(TAG, "Missing SF jank callback for vsyncId: " + info.frameVsyncId
+                             + ", CUJ=" + name);
+                 }
+             } else if (Flags.useSfFrameDuration() && info.surfaceControlCallbackFired) {
+diff --git a/packages/BackupRestoreConfirmation/src/com/android/backupconfirm/BackupRestoreConfirmation.java b/packages/BackupRestoreConfirmation/src/com/android/backupconfirm/BackupRestoreConfirmation.java
+index bc06bdbd29afd..60ef1c9c645aa 100644
+--- a/packages/BackupRestoreConfirmation/src/com/android/backupconfirm/BackupRestoreConfirmation.java
++++ b/packages/BackupRestoreConfirmation/src/com/android/backupconfirm/BackupRestoreConfirmation.java
+@@ -55,7 +55,7 @@
+  */
+ public class BackupRestoreConfirmation extends Activity {
+     static final String TAG = "BackupRestoreConfirmation";
+-    static final boolean DEBUG = true;
++    static final boolean DEBUG = false;
+ 
+     static final String KEY_DID_ACKNOWLEDGE = "did_acknowledge";
+     static final String KEY_TOKEN = "token";
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/GestureRecorder.java b/packages/SystemUI/src/com/android/systemui/statusbar/GestureRecorder.java
+index a49af47f4803b..4adb8868c0b78 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/GestureRecorder.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/GestureRecorder.java
+@@ -33,7 +33,7 @@
+  * Convenience class for capturing gestures for later analysis.
+  */
+ public class GestureRecorder {
+-    public static final boolean DEBUG = true; // for now
++    public static final boolean DEBUG = false; // for now
+     public static final String TAG = GestureRecorder.class.getSimpleName();
+ 
+     public class Gesture {
+diff --git a/services/core/jni/com_android_server_lights_LightsService.cpp b/services/core/jni/com_android_server_lights_LightsService.cpp
+index 35d8219651d74..c12f205f7d835 100644
+--- a/services/core/jni/com_android_server_lights_LightsService.cpp
++++ b/services/core/jni/com_android_server_lights_LightsService.cpp
+@@ -112,7 +112,7 @@ static void processReturn(
+         case Status::SUCCESS:
+             break;
+         case Status::LIGHT_NOT_SUPPORTED:
+-            ALOGE("Light requested not available on this device. %d", type);
++            ALOGV("Light requested not available on this device. %d", type);
+             break;
+         case Status::BRIGHTNESS_NOT_SUPPORTED:
+             ALOGE("Brightness parameter not supported on this device: %d",
+diff --git a/services/core/java/com/android/server/attention/AttentionManagerService.java b/services/core/java/com/android/server/attention/AttentionManagerService.java
+index 5edbaa93964a3..195070e7c6ea0 100644
+--- a/services/core/java/com/android/server/attention/AttentionManagerService.java
++++ b/services/core/java/com/android/server/attention/AttentionManagerService.java
+@@ -472,7 +472,7 @@ private static ComponentName resolveAttentionService(Context context) {
+ 
+         final ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent, flags);
+         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+-            Slog.wtf(LOG_TAG, String.format("Service %s not found in package %s",
++            Slog.v(LOG_TAG, String.format("Service %s not found in package %s",
+                     AttentionService.SERVICE_INTERFACE, serviceConfigPackage
+             ));
+             return null;
+diff --git a/core/java/android/app/SystemServiceRegistry.java b/core/java/android/app/SystemServiceRegistry.java
+index e2f5c8d537109..3ea08d6bc0423 100644
+--- a/core/java/android/app/SystemServiceRegistry.java
++++ b/core/java/android/app/SystemServiceRegistry.java
+@@ -1214,7 +1214,7 @@ public PersistentDataBlockManager createService() throws ServiceNotFoundExceptio
+                 new StaticServiceFetcher<OemLockManager>() {
+             @Override
+             public OemLockManager createService() throws ServiceNotFoundException {
+-                IBinder b = ServiceManager.getServiceOrThrow(Context.OEM_LOCK_SERVICE);
++                IBinder b = ServiceManager.getService(Context.OEM_LOCK_SERVICE);
+                 IOemLockService oemLockService = IOemLockService.Stub.asInterface(b);
+                 if (oemLockService != null) {
+                     return new OemLockManager(oemLockService);
+diff --git a/core/java/com/android/internal/os/Zygote.java b/core/java/com/android/internal/os/Zygote.java
+index 168e4e5b347cd..7bf8017f8f567 100644
+--- a/core/java/com/android/internal/os/Zygote.java
++++ b/core/java/com/android/internal/os/Zygote.java
+@@ -64,30 +64,30 @@ public final class Zygote {
+     */
+ 
+     /** enable debugging over JDWP */
+-    public static final int DEBUG_ENABLE_JDWP   = 1;
++    public static final int DEBUG_ENABLE_JDWP   = 0;
+     /** enable JNI checks */
+-    public static final int DEBUG_ENABLE_CHECKJNI   = 1 << 1;
++    public static final int DEBUG_ENABLE_CHECKJNI   = 0;
+     /** enable Java programming language "assert" statements */
+-    public static final int DEBUG_ENABLE_ASSERT     = 1 << 2;
++    public static final int DEBUG_ENABLE_ASSERT     = 0;
+     /** disable the AOT compiler and JIT */
+-    public static final int DEBUG_ENABLE_SAFEMODE   = 1 << 3;
++    public static final int DEBUG_ENABLE_SAFEMODE   = 0;
+     /** Enable logging of third-party JNI activity. */
+-    public static final int DEBUG_ENABLE_JNI_LOGGING = 1 << 4;
++    public static final int DEBUG_ENABLE_JNI_LOGGING = 0;
+     /** Force generation of native debugging information. */
+-    public static final int DEBUG_GENERATE_DEBUG_INFO = 1 << 5;
++    public static final int DEBUG_GENERATE_DEBUG_INFO = 0;
+     /** Always use JIT-ed code. */
+-    public static final int DEBUG_ALWAYS_JIT = 1 << 6;
++    public static final int DEBUG_ALWAYS_JIT = 0;
+     /** Make the code native debuggable by turning off some optimizations. */
+-    public static final int DEBUG_NATIVE_DEBUGGABLE = 1 << 7;
++    public static final int DEBUG_NATIVE_DEBUGGABLE = 0;
+     /** Make the code Java debuggable by turning off some optimizations. */
+-    public static final int DEBUG_JAVA_DEBUGGABLE = 1 << 8;
++    public static final int DEBUG_JAVA_DEBUGGABLE = 0;
+ 
+     /** Turn off the verifier. */
+     public static final int DISABLE_VERIFIER = 1 << 9;
+     /** Only use oat files located in /system. Otherwise use dex/jar/apk . */
+     public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
+     /** Force generation of native debugging information for backtraces. */
+-    public static final int DEBUG_GENERATE_MINI_DEBUG_INFO = 1 << 11;
++    public static final int DEBUG_GENERATE_MINI_DEBUG_INFO = 0;
+     /**
+      * Hidden API access restrictions. This is a mask for bits representing the API enforcement
+      * policy, defined by {@code @ApplicationInfo.HiddenApiEnforcementPolicy}.
+@@ -1064,13 +1064,13 @@ static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
+      * @param args non-null; zygote spawner args
+      */
+     static void applyDebuggerSystemProperty(ZygoteArguments args) {
+-        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_JDWP)) {
++        if (Build.IS_ENG) {
+             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+             // Also enable ptrace when JDWP is enabled for consistency with
+             // before persist.debug.ptrace.enabled existed.
+             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
+         }
+-        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_PTRACE)) {
++        if (Build.IS_ENG) {
+             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
+         }
+     }
+diff --git a/media/java/android/media/Ringtone.java b/media/java/android/media/Ringtone.java
+index 414876a895277..bf3b57b4f55c6 100644
+--- a/media/java/android/media/Ringtone.java
++++ b/media/java/android/media/Ringtone.java
+@@ -58,7 +58,7 @@
+  */
+ public class Ringtone {
+     private static final String TAG = "Ringtone";
+-    private static final boolean LOGD = true;
++    private static final boolean LOGD = false;
+ 
+     private static final String[] MEDIA_COLUMNS = new String[] {
+         MediaStore.Audio.Media._ID,
+diff --git a/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/DeadZone.java b/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/DeadZone.java
+index a6be314158ca3..3afd14e2b23e0 100644
+--- a/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/DeadZone.java
++++ b/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/DeadZone.java
+@@ -46,7 +46,7 @@ public class DeadZone {
+     public static final int HORIZONTAL = 0;  // Consume taps along the top edge.
+     public static final int VERTICAL = 1;  // Consume taps along the left edge.
+ 
+-    private static final boolean CHATTY = true; // print to logcat when we eat a click
++    private static final boolean CHATTY = false; // print to logcat when we eat a click
+ 
+     private static final FloatProperty<DeadZone> FLASH_PROPERTY =
+             new FloatProperty<DeadZone>("DeadZoneFlash") {
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/BluetoothUtils.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/BluetoothUtils.java
+index 975fdafdcaf7d..fff3ebb381242 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/BluetoothUtils.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/BluetoothUtils.java
+@@ -74,7 +74,7 @@ public class BluetoothUtils {
+     private static final String TAG = "BluetoothUtils";
+ 
+     public static final boolean V = false; // verbose logging
+-    public static final boolean D = true; // regular logging
++    public static final boolean D = false; // regular logging
+ 
+     public static final int META_INT_ERROR = -1;
+     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
+diff --git a/apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java b/apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java
+index 80421cd5e3f76..1e5bcbcb875fb 100644
+--- a/apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java
++++ b/apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java
+@@ -5559,7 +5559,7 @@ private void decrementAlarmCount(int uid, int decrement) {
+             }
+         }
+         if (oldCount < decrement) {
+-            Slog.wtf(TAG, "Attempt to decrement existing alarm count " + oldCount + " by "
++            Slog.w(TAG, "Attempt to decrement existing alarm count " + oldCount + " by "
+                     + decrement + " for uid " + uid);
+         }
+     }
+diff --git a/location/java/com/android/internal/location/GpsNetInitiatedHandler.java b/location/java/com/android/internal/location/GpsNetInitiatedHandler.java
+index 8aa80aa17fd20..17843a2afcc8c 100644
+--- a/location/java/com/android/internal/location/GpsNetInitiatedHandler.java
++++ b/location/java/com/android/internal/location/GpsNetInitiatedHandler.java
+@@ -38,7 +38,7 @@ public class GpsNetInitiatedHandler {
+ 
+     private static final String TAG = "GpsNetInitiatedHandler";
+ 
+-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
++    private static final boolean DEBUG = false;
+ 
+     private final Context mContext;
+     private final TelephonyManager mTelephonyManager;
+diff --git a/libs/androidfw/ResourceTypes.cpp b/libs/androidfw/ResourceTypes.cpp
+index 0a70f26ab8514..c41aef6f9fe49 100644
+--- a/libs/androidfw/ResourceTypes.cpp
++++ b/libs/androidfw/ResourceTypes.cpp
+@@ -4544,7 +4544,7 @@ bool ResTable::getResourceName(uint32_t resID, bool allowUtf8, resource_name* ou
+ 
+     if (p < 0) {
+         if (Res_GETPACKAGE(resID)+1 == 0) {
+-            ALOGW("No package identifier when getting name for resource number 0x%08x", resID);
++            ALOGV("No package identifier when getting name for resource number 0x%08x", resID);
+         } else {
+ #ifndef STATIC_ANDROIDFW_FOR_TOOLS
+             ALOGW("No known package when getting name for resource number 0x%08x", resID);
+diff --git a/core/java/android/os/BinderProxy.java b/core/java/android/os/BinderProxy.java
+index 1ef0de78308a4..beff29b7ac5a0 100644
+--- a/core/java/android/os/BinderProxy.java
++++ b/core/java/android/os/BinderProxy.java
+@@ -551,7 +551,7 @@ public boolean transact(int code, Parcel data, Parcel reply, int flags) throws R
+             mWarnOnBlocking = false;
+             warnOnBlocking = false;
+ 
+-            if (Build.IS_USERDEBUG || Build.IS_ENG) {
++            if (Build.IS_ENG) {
+                 // Log this as a WTF on userdebug and eng builds.
+                 Log.wtf(Binder.TAG,
+                         "Outgoing transactions from this process must be FLAG_ONEWAY",
+diff --git a/core/java/android/view/autofill/AutofillManager.java b/core/java/android/view/autofill/AutofillManager.java
+index 89b38d787ba9e..1afa6a9dc71c7 100644
+--- a/core/java/android/view/autofill/AutofillManager.java
++++ b/core/java/android/view/autofill/AutofillManager.java
+@@ -372,7 +372,7 @@ public final class AutofillManager {
+     /** @hide */ public static final int RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY = 0x1;
+ 
+     /** @hide */
+-    public static final int DEFAULT_LOGGING_LEVEL = Build.IS_DEBUGGABLE
++    public static final int DEFAULT_LOGGING_LEVEL = Build.IS_ENG
+             ? AutofillManager.FLAG_ADD_CLIENT_DEBUG
+             : AutofillManager.NO_LOGGING;
+ 
+diff --git a/packages/SystemUI/src/com/android/systemui/SystemUIService.java b/packages/SystemUI/src/com/android/systemui/SystemUIService.java
+index 0c43bb08acd6e..19af3d18e6727 100644
+--- a/packages/SystemUI/src/com/android/systemui/SystemUIService.java
++++ b/packages/SystemUI/src/com/android/systemui/SystemUIService.java
+@@ -99,7 +99,7 @@ public void onCreate() {
+             throw new RuntimeException();
+         }
+ 
+-        if (Build.IS_DEBUGGABLE) {
++        if (Build.IS_ENG) {
+             // b/71353150 - looking for leaked binder proxies
+             BinderInternal.nSetBinderProxyCountEnabled(true);
+             BinderInternal.nSetBinderProxyCountWatermarks(
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 0fd4a3aa76515..9d9e1f5996dc9 100644
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -7763,7 +7763,7 @@ public boolean isUserAMonkey() {
+ 
+     @Override
+     public void requestSystemServerHeapDump() {
+-        if (!Build.IS_DEBUGGABLE) {
++        if (!Build.IS_ENG) {
+             Slog.wtf(TAG, "requestSystemServerHeapDump called on a user build");
+             return;
+         }
+diff --git a/services/core/java/com/android/server/cpu/CpuMonitorService.java b/services/core/java/com/android/server/cpu/CpuMonitorService.java
+index 2cadbc58d0f22..9843d960479a2 100644
+--- a/services/core/java/com/android/server/cpu/CpuMonitorService.java
++++ b/services/core/java/com/android/server/cpu/CpuMonitorService.java
+@@ -76,7 +76,7 @@ public final class CpuMonitorService extends SystemService {
+      * On user-debug or eng builds, continuously cache stats with a bigger cache size for debugging
+      * purposes.
+      */
+-    private static final long CACHE_DURATION_MILLISECONDS = Build.IS_USERDEBUG || Build.IS_ENG
++    private static final long CACHE_DURATION_MILLISECONDS = Build.IS_ENG
+             ? TimeUnit.MINUTES.toMillis(30) : TimeUnit.MINUTES.toMillis(10);
+     // TODO(b/267500110): Investigate whether this duration should change when the monitoring
+     //  interval is updated. When the CPU is under heavy load, the monitoring will happen less
+@@ -163,7 +163,7 @@ public void removeCpuAvailabilityCallback(CpuAvailabilityCallback callback) {
+     public CpuMonitorService(Context context) {
+         this(context, new CpuInfoReader(), new ServiceThread(TAG,
+                         Process.THREAD_PRIORITY_BACKGROUND, /* allowIo= */ true),
+-                Build.IS_USERDEBUG || Build.IS_ENG, NORMAL_MONITORING_INTERVAL_MILLISECONDS,
++                Build.IS_ENG, NORMAL_MONITORING_INTERVAL_MILLISECONDS,
+                 DEBUG_MONITORING_INTERVAL_MILLISECONDS, LATEST_AVAILABILITY_DURATION_MILLISECONDS,
+                 STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS);
+     }
+diff --git a/services/core/java/com/android/server/webkit/SystemImpl.java b/services/core/java/com/android/server/webkit/SystemImpl.java
+index c7f8185549f74..6d487060c1759 100644
+--- a/services/core/java/com/android/server/webkit/SystemImpl.java
++++ b/services/core/java/com/android/server/webkit/SystemImpl.java
+@@ -247,7 +247,7 @@ private void installPackageForUser(String packageName, UserHandle user) {
+ 
+     @Override
+     public boolean systemIsDebuggable() {
+-        return Build.isDebuggable();
++        return Build.IS_ENG;
+     }
+ 
+     @Override
+diff --git a/services/java/com/android/server/SystemServer.java b/services/java/com/android/server/SystemServer.java
+index a184d6a7efe8e..ddc6c3dc09c13 100644
+--- a/services/java/com/android/server/SystemServer.java
++++ b/services/java/com/android/server/SystemServer.java
+@@ -959,7 +959,7 @@ private void run() {
+             initZygoteChildHeapProfiling();
+ 
+             // Debug builds - spawn a thread to monitor for fd leaks.
+-            if (Build.IS_DEBUGGABLE) {
++            if (Build.IS_ENG) {
+                 spawnFdLeakCheckThread();
+             }
+ 
+diff --git a/libs/hwui/pipeline/skia/ShaderCache.cpp b/libs/hwui/pipeline/skia/ShaderCache.cpp
+index 22f59a67bccbb..2d2d5c617a9fa 100644
+--- a/libs/hwui/pipeline/skia/ShaderCache.cpp
++++ b/libs/hwui/pipeline/skia/ShaderCache.cpp
+@@ -36,8 +36,8 @@ namespace skiapipeline {
+ 
+ // Cache size limits.
+ static const size_t maxKeySize = 1024;
+-static const size_t maxValueSize = 2 * 1024 * 1024;
+-static const size_t maxTotalSize = 4 * 1024 * 1024;
++static const size_t maxValueSize = 4 * 1024 * 1024;
++static const size_t maxTotalSize = 8 * 1024 * 1024;
+ static_assert(maxKeySize + maxValueSize < maxTotalSize);
+ 
+ ShaderCache::ShaderCache() {
+diff --git a/libs/hwui/pipeline/skia/ShaderCache.h b/libs/hwui/pipeline/skia/ShaderCache.h
+index 4c011613710bc..1dfe9f8a81825 100644
+--- a/libs/hwui/pipeline/skia/ShaderCache.h
++++ b/libs/hwui/pipeline/skia/ShaderCache.h
+@@ -170,7 +170,7 @@ class ShaderCache : public GrContextOptions::PersistentCache {
+      *
+      *  WARNING: setting this to 0 will disable writing the cache to disk.
+      */
+-    unsigned int mDeferredSaveDelayMs = 4 * 1000;
++    unsigned int mDeferredSaveDelayMs = 8 * 1000;
+ 
+     /**
+      * "mMutex" is the shared mutex used to prevent concurrent access to the member
+diff --git a/libs/hwui/Android.bp b/libs/hwui/Android.bp
+index 0780ec281904f..08c99a0414010 100644
+--- a/libs/hwui/Android.bp
++++ b/libs/hwui/Android.bp
+@@ -50,7 +50,7 @@ cc_defaults {
+         "hwui_static_deps",
+         "skia_deps",
+         //"hwui_bugreport_font_cache_usage",
+-        //"hwui_compile_for_perf",
++        "hwui_compile_for_perf",
+         "hwui_lto",
+     ],
+ 
+@@ -184,12 +184,6 @@ cc_defaults {
+ 
+ cc_defaults {
+     name: "hwui_compile_for_perf",
+-    // TODO: Non-arm?
+-    cflags: [
+-        "-fno-omit-frame-pointer",
+-        "-marm",
+-        "-mapcs",
+-    ],
+ }
+ 
+ // Build hwui library with ThinLTO by default.
+diff --git a/packages/SystemUI/Android.bp b/packages/SystemUI/Android.bp
+index b41566be77c79..282b8f6337ace 100644
+--- a/packages/SystemUI/Android.bp
++++ b/packages/SystemUI/Android.bp
+@@ -619,7 +619,6 @@ android_library {
+         "com.android.systemui.pods-impl-aosp-handheld",
+     ],
+     javacflags: [
+-        "-Adagger.fastInit=enabled",
+         "-Adagger.explicitBindingConflictsWithInject=ERROR",
+         "-Adagger.strictMultibindingValidation=enabled",
+         "-Adagger.useBindingGraphFix=ENABLED",
+diff --git a/core/java/com/android/internal/widget/BigPictureNotificationImageView.java b/core/java/com/android/internal/widget/BigPictureNotificationImageView.java
+index 3f3b513eff509..1c428ff0228d1 100644
+--- a/core/java/com/android/internal/widget/BigPictureNotificationImageView.java
++++ b/core/java/com/android/internal/widget/BigPictureNotificationImageView.java
+@@ -66,7 +66,7 @@ public BigPictureNotificationImageView(@NonNull Context context, @Nullable Attri
+     public BigPictureNotificationImageView(@NonNull Context context, @Nullable AttributeSet attrs,
+             @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+         super(context, attrs, defStyleAttr, defStyleRes);
+-        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
++        boolean isLowRam = true;
+         mMaximumDrawableWidth = context.getResources().getDimensionPixelSize(
+                 isLowRam ? R.dimen.notification_big_picture_max_width_low_ram
+                         : R.dimen.notification_big_picture_max_width);
+diff --git a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
+index 8274713d3cb7e..99d55aa57138d 100644
+--- a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
++++ b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenMediaRecorder.java
+@@ -471,7 +471,7 @@ public SavedRecording save() throws IOException, IllegalStateException {
+      * Returns the required {@code Size} of the thumbnail.
+      */
+     private Size getRequiredThumbnailSize() {
+-        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
++        boolean isLowRam = true;
+         int thumbnailIconHeight = mContext.getResources().getDimensionPixelSize(isLowRam
+                 ? R.dimen.notification_big_picture_max_height_low_ram
+                 : R.dimen.notification_big_picture_max_height);
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/StatusBarIconView.java b/packages/SystemUI/src/com/android/systemui/statusbar/StatusBarIconView.java
+index bdf215c7f85ba..c8bc05e4cc580 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/StatusBarIconView.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/StatusBarIconView.java
+@@ -497,7 +497,7 @@ private Drawable getIcon(Context sysuiContext,
+             // We downscale the loaded drawable to reasonable size to protect against applications
+             // using too much memory. The size can be tweaked in config.xml. Drawables that are
+             // already sized properly won't be touched.
+-            boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
++            boolean isLowRamDevice = true;
+             Resources res = sysuiContext.getResources();
+             int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
+                     ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/BigPictureIconManager.kt b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/BigPictureIconManager.kt
+index 916414548fbd4..deb8042cb2269 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/BigPictureIconManager.kt
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/BigPictureIconManager.kt
+@@ -208,7 +208,7 @@ constructor(
+     }
+ 
+     private fun isLowRam(): Boolean {
+-        return ActivityManager.isLowRamDeviceStatic()
++        return true
+     }
+ 
+     private fun getMaxWidth() =
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationInlineImageResolver.java b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationInlineImageResolver.java
+index 3e932aa616b89..e56f1486e87ad 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationInlineImageResolver.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationInlineImageResolver.java
+@@ -90,7 +90,7 @@ public boolean hasCache() {
+     }
+ 
+     private boolean isLowRam() {
+-        return ActivityManager.isLowRamDeviceStatic();
++        return true;
+     }
+ 
+     /**
+@@ -103,16 +103,14 @@ public void updateMaxImageSizes() {
+ 
+     @VisibleForTesting
+     protected int getMaxImageWidth() {
+-        return mContext.getResources().getDimensionPixelSize(isLowRam()
+-                ? R.dimen.notification_custom_view_max_image_width_low_ram
+-                : R.dimen.notification_custom_view_max_image_width);
++        return mContext.getResources().getDimensionPixelSize(
++                R.dimen.notification_custom_view_max_image_width_low_ram);
+     }
+ 
+     @VisibleForTesting
+     protected int getMaxImageHeight() {
+-        return mContext.getResources().getDimensionPixelSize(isLowRam()
+-                ? R.dimen.notification_custom_view_max_image_height_low_ram
+-                : R.dimen.notification_custom_view_max_image_height);
++        return mContext.getResources().getDimensionPixelSize(
++                R.dimen.notification_custom_view_max_image_height_low_ram);
+     }
+ 
+     /**
+diff --git a/packages/SystemUI/src/com/android/systemui/log/LogBufferHelper.kt b/packages/SystemUI/src/com/android/systemui/log/LogBufferHelper.kt
+index 619eac1dbdc33..d44d13789a521 100644
+--- a/packages/SystemUI/src/com/android/systemui/log/LogBufferHelper.kt
++++ b/packages/SystemUI/src/com/android/systemui/log/LogBufferHelper.kt
+@@ -22,11 +22,7 @@ class LogBufferHelper {
+     companion object {
+         /** If necessary, returns a limited maximum size for low ram (Go) devices */
+         fun adjustMaxSize(requestedMaxSize: Int): Int {
+-            return if (ActivityManager.isLowRamDeviceStatic()) {
+-                minOf(requestedMaxSize, 20) /* low ram max log size*/
+-            } else {
+-                requestedMaxSize
+-            }
++            return minOf(requestedMaxSize, 20) /* low ram max log size*/
+         }
+     }
+ }
+diff --git a/packages/SystemUI/src/com/android/systemui/util/NoRemeasureMotionLayout.kt b/packages/SystemUI/src/com/android/systemui/util/NoRemeasureMotionLayout.kt
+index f49d616181d21..532281917f90a 100644
+--- a/packages/SystemUI/src/com/android/systemui/util/NoRemeasureMotionLayout.kt
++++ b/packages/SystemUI/src/com/android/systemui/util/NoRemeasureMotionLayout.kt
+@@ -20,7 +20,6 @@ import android.content.Context
+ import android.util.AttributeSet
+ import android.view.Choreographer
+ import androidx.constraintlayout.motion.widget.MotionLayout
+-import com.android.app.tracing.traceSection
+ 
+ /**
+  * [MotionLayout] that avoids remeasuring with the same inputs in the same frame.
+@@ -48,11 +47,9 @@ class NoRemeasureMotionLayout @JvmOverloads constructor(
+             setMeasuredDimension(measuredWidth, measuredHeight)
+             return
+         }
+-        traceSection("NoRemeasureMotionLayout - measure") {
+             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+             lastWidthSpec = widthMeasureSpec
+             lastHeightSpec = heightMeasureSpec
+             lastFrame = Choreographer.getMainThreadInstance()?.frameTime
+-        }
+     }
+ }
+diff --git a/services/core/java/com/android/server/policy/PhoneWindowManager.java b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+index 8476dc3026da1..2971c4b9e25cc 100644
+--- a/services/core/java/com/android/server/policy/PhoneWindowManager.java
++++ b/services/core/java/com/android/server/policy/PhoneWindowManager.java
+@@ -517,6 +517,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+     private boolean mHasFeatureWatch;
+     private boolean mHasFeatureLeanback;
+     private boolean mHasFeatureHdmiCec;
++    
++    private boolean mIsSetupComplete = false;
+ 
+     // Assigned on main thread, accessed on UI thread
+     volatile VrManagerInternal mVrManagerInternal;
+@@ -950,6 +952,9 @@ class SettingsObserver extends ContentObserver {
+         void observe() {
+             // Observe all users' changes
+             ContentResolver resolver = mContext.getContentResolver();
++            resolver.registerContentObserver(Settings.Secure.getUriFor(
++                    Settings.Secure.USER_SETUP_COMPLETE), false, this,
++                    UserHandle.USER_ALL);
+             resolver.registerContentObserver(Settings.System.getUriFor(
+                     Settings.System.END_BUTTON_BEHAVIOR), false, this,
+                     UserHandle.USER_ALL);
+@@ -2158,8 +2163,7 @@ boolean isDeviceProvisioned() {
+ 
+     @Override
+     public boolean isUserSetupComplete() {
+-        boolean isSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+-                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
++        boolean isSetupComplete = mIsSetupComplete;
+         if (mHasFeatureLeanback) {
+             isSetupComplete &= isTvUserSetupComplete();
+         } else if (mHasFeatureAuto) {
+@@ -3438,6 +3442,8 @@ void updateSettings(Handler handler) {
+             return;
+         }
+         ContentResolver resolver = mContext.getContentResolver();
++        mIsSetupComplete = Settings.Secure.getIntForUser(mContext.getContentResolver(),
++                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+         boolean updateRotation = false;
+         boolean updateKidsModeSettings = false;
+         final boolean kidsModeEnabled;
+diff --git a/services/core/java/com/android/server/wm/DisplayRotation.java b/services/core/java/com/android/server/wm/DisplayRotation.java
+index 1a70d3a6867b6..ab0fbd4f401d2 100644
+--- a/services/core/java/com/android/server/wm/DisplayRotation.java
++++ b/services/core/java/com/android/server/wm/DisplayRotation.java
+@@ -1865,7 +1865,7 @@ public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                         }
+                     };
+                     mSensorManager.registerListener(mHingeAngleSensorEventListener,
+-                            hingeAngleSensor, SensorManager.SENSOR_DELAY_FASTEST, getHandler());
++                            hingeAngleSensor, SensorManager.SENSOR_DELAY_NORMAL, getHandler());
+                 }
+             }
+         }
+diff --git a/services/core/java/com/android/server/DropBoxManagerService.java b/services/core/java/com/android/server/DropBoxManagerService.java
+index 1f042fc753e54..2cd4e09a2e28e 100644
+--- a/services/core/java/com/android/server/DropBoxManagerService.java
++++ b/services/core/java/com/android/server/DropBoxManagerService.java
+@@ -1238,8 +1238,7 @@ private synchronized long trimToFit() throws IOException {
+                 Settings.Global.DROPBOX_AGE_SECONDS, DEFAULT_AGE_SECONDS);
+         mMaxFiles = Settings.Global.getInt(mContentResolver,
+                 Settings.Global.DROPBOX_MAX_FILES,
+-                (ActivityManager.isLowRamDeviceStatic()
+-                        ?  DEFAULT_MAX_FILES_LOWRAM : DEFAULT_MAX_FILES));
++                        DEFAULT_MAX_FILES_LOWRAM);
+         long curTimeMillis = System.currentTimeMillis();
+         long cutoffMillis = curTimeMillis - ageSeconds * 1000;
+         while (!mAllFiles.contents.isEmpty()) {
+diff --git a/services/core/java/com/android/server/inputmethod/StartInputHistory.java b/services/core/java/com/android/server/inputmethod/StartInputHistory.java
+index 3a39434f2d02b..b9a4c82d0c276 100644
+--- a/services/core/java/com/android/server/inputmethod/StartInputHistory.java
++++ b/services/core/java/com/android/server/inputmethod/StartInputHistory.java
+@@ -52,11 +52,7 @@ final class StartInputHistory {
+     private static final int ENTRY_SIZE_FOR_LOW_RAM_DEVICE = 5;
+ 
+     private static int getEntrySize() {
+-        if (ActivityManager.isLowRamDeviceStatic()) {
+             return ENTRY_SIZE_FOR_LOW_RAM_DEVICE;
+-        } else {
+-            return ENTRY_SIZE_FOR_HIGH_RAM_DEVICE;
+-        }
+     }
+ 
+     /**
+diff --git a/services/core/java/com/android/server/net/NetworkPolicyLogger.java b/services/core/java/com/android/server/net/NetworkPolicyLogger.java
+index 681aa8aef219b..a30008971cd6c 100644
+--- a/services/core/java/com/android/server/net/NetworkPolicyLogger.java
++++ b/services/core/java/com/android/server/net/NetworkPolicyLogger.java
+@@ -66,10 +66,8 @@ public class NetworkPolicyLogger {
+     static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
+     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
+ 
+-    private static final int MAX_LOG_SIZE =
+-            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
+-    private static final int MAX_NETWORK_BLOCKED_LOG_SIZE =
+-            ActivityManager.isLowRamDeviceStatic() ? 100 : 400;
++    private static final int MAX_LOG_SIZE = 100;
++    private static final int MAX_NETWORK_BLOCKED_LOG_SIZE = 100;
+ 
+     private static final int EVENT_TYPE_GENERIC = 0;
+     private static final int EVENT_NETWORK_BLOCKED = 1;
+diff --git a/services/core/java/com/android/server/pm/ShortcutService.java b/services/core/java/com/android/server/pm/ShortcutService.java
+index be1b3c17f5980..7e06edc2fa095 100644
+--- a/services/core/java/com/android/server/pm/ShortcutService.java
++++ b/services/core/java/com/android/server/pm/ShortcutService.java
+@@ -818,13 +818,10 @@ boolean updateConfigurationLocked(String config) {
+         mMaxShortcutsPerApp = Math.max(0, (int) parser.getLong(
+                 ConfigConstants.KEY_MAX_SHORTCUTS_PER_APP, DEFAULT_MAX_SHORTCUTS_PER_APP));
+ 
+-        final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
+-                ? (int) parser.getLong(
++        final int iconDimensionDp = Math.max(1,
++                (int) parser.getLong(
+                 ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM,
+-                DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP)
+-                : (int) parser.getLong(
+-                ConfigConstants.KEY_MAX_ICON_DIMENSION_DP,
+-                DEFAULT_MAX_ICON_DIMENSION_DP));
++                DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP));
+ 
+         mMaxIconDimension = injectDipToPixel(iconDimensionDp);
+ 
+diff --git a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+index b4f79f6f599e7..36c4c0a215117 100644
+--- a/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
++++ b/services/core/java/com/android/server/pm/permission/DefaultPermissionGrantPolicy.java
+@@ -820,14 +820,12 @@ private void grantDefaultSystemHandlerPermissions(PackageManagerWrapper pm, int
+             }
+         }
+ 
+-        if (ActivityManager.isLowRamDeviceStatic()) {
+             // Allow voice search on low-ram devices
+             grantPermissionsToSystemPackage(pm,
+                     getDefaultSystemHandlerActivityPackage(pm,
+                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
+                     userId, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                     NOTIFICATION_PERMISSIONS);
+-        }
+ 
+         // Voice recognition
+         Intent voiceRecoIntent = new Intent(RecognitionService.SERVICE_INTERFACE)
+diff --git a/services/core/java/com/android/server/am/BroadcastConstants.java b/services/core/java/com/android/server/am/BroadcastConstants.java
+index 598e43f2a0139..998e212988552 100644
+--- a/services/core/java/com/android/server/am/BroadcastConstants.java
++++ b/services/core/java/com/android/server/am/BroadcastConstants.java
+@@ -117,8 +117,7 @@ public class BroadcastConstants {
+      */
+     public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
+     private static final String KEY_MAX_RUNNING_PROCESS_QUEUES = "bcast_max_running_process_queues";
+-    private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES =
+-            ActivityManager.isLowRamDeviceStatic() ? 2 : 4;
++    private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES = 2;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Additional running process queue parallelism beyond
+@@ -157,8 +156,7 @@ public class BroadcastConstants {
+     public int MAX_RUNNING_ACTIVE_BROADCASTS = DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS;
+     private static final String KEY_MAX_RUNNING_ACTIVE_BROADCASTS =
+             "bcast_max_running_active_broadcasts";
+-    private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS =
+-            ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
++    private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS = 8;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Maximum number of active "blocking" broadcasts
+@@ -170,8 +168,7 @@ public class BroadcastConstants {
+     public int MAX_CORE_RUNNING_BLOCKING_BROADCASTS = DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS;
+     private static final String KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS =
+             "bcast_max_core_running_blocking_broadcasts";
+-    private static final int DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS =
+-            ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
++    private static final int DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS = 8;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Maximum number of active non-"blocking" broadcasts
+@@ -184,8 +181,7 @@ public class BroadcastConstants {
+             DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS;
+     private static final String KEY_CORE_MAX_RUNNING_NON_BLOCKING_BROADCASTS =
+             "bcast_max_core_running_non_blocking_broadcasts";
+-    private static final int DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS =
+-            ActivityManager.isLowRamDeviceStatic() ? 32 : 64;
++    private static final int DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS = 32;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Maximum number of pending
+@@ -194,8 +190,7 @@ public class BroadcastConstants {
+      */
+     public int MAX_PENDING_BROADCASTS = DEFAULT_MAX_PENDING_BROADCASTS;
+     private static final String KEY_MAX_PENDING_BROADCASTS = "bcast_max_pending_broadcasts";
+-    private static final int DEFAULT_MAX_PENDING_BROADCASTS =
+-            ActivityManager.isLowRamDeviceStatic() ? 128 : 256;
++    private static final int DEFAULT_MAX_PENDING_BROADCASTS = 128;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Delay to apply to normal
+@@ -248,8 +243,7 @@ public class BroadcastConstants {
+      */
+     public int MAX_HISTORY_COMPLETE_SIZE = DEFAULT_MAX_HISTORY_COMPLETE_SIZE;
+     private static final String KEY_MAX_HISTORY_COMPLETE_SIZE = "bcast_max_history_complete_size";
+-    private static final int DEFAULT_MAX_HISTORY_COMPLETE_SIZE =
+-            ActivityManager.isLowRamDeviceStatic() ? 64 : 256;
++    private static final int DEFAULT_MAX_HISTORY_COMPLETE_SIZE = 64;
+ 
+     /**
+      * For {@link BroadcastQueueImpl}: Maximum number of summarized
+@@ -257,8 +251,7 @@ public class BroadcastConstants {
+      */
+     public int MAX_HISTORY_SUMMARY_SIZE = DEFAULT_MAX_HISTORY_SUMMARY_SIZE;
+     private static final String KEY_MAX_HISTORY_SUMMARY_SIZE = "bcast_max_history_summary_size";
+-    private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE =
+-            ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
++    private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE = 256;
+ 
+     /**
+      * For {@link BroadcastRecord}: Default to treating all broadcasts sent by
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 143294982afa2..0fd4a3aa76515 100644
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -5384,7 +5384,7 @@ public void performReceive(Intent intent, int resultCode,
+     }
+ 
+     private void showConsoleNotificationIfActive() {
+-        if (!SystemProperties.get("init.svc.console").equals("running")) {
++        if (!SystemProperties.get("init.svc.console").equals("running") || true) {
+             return;
+         }
+         String title = mContext
+diff --git a/core/jni/AndroidRuntime.cpp b/core/jni/AndroidRuntime.cpp
+index 30a49b74efcaa..0e17a5abba09c 100644
+--- a/core/jni/AndroidRuntime.cpp
++++ b/core/jni/AndroidRuntime.cpp
+@@ -936,10 +936,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
+     parseRuntimeOption("dalvik.vm.ps-inline-cache-threshold", profileInlineCacheThresholdOptsBuf,
+             "-Xps-inline-cache-threshold:");
+ 
+-    property_get("ro.config.low_ram", propBuf, "");
+-    if (strcmp(propBuf, "true") == 0) {
+       addOption("-XX:LowMemoryMode");
+-    }
+ 
+     /*
+      * Garbage-collection related options.
+diff --git a/apex/jobscheduler/framework/java/android/app/job/JobInfo.java b/apex/jobscheduler/framework/java/android/app/job/JobInfo.java
+index 1cee7bf61473a..3bd671d103b2c 100644
+--- a/apex/jobscheduler/framework/java/android/app/job/JobInfo.java
++++ b/apex/jobscheduler/framework/java/android/app/job/JobInfo.java
+@@ -208,10 +208,10 @@ public class JobInfo implements Parcelable {
+     public static final int BACKOFF_POLICY_EXPONENTIAL = 1;
+ 
+     /* Minimum interval for a periodic job, in milliseconds. */
+-    private static final long MIN_PERIOD_MILLIS = 15 * 60 * 1000L;   // 15 minutes
++    private static final long MIN_PERIOD_MILLIS = 30 * 60 * 1000L;   // 30 minutes
+ 
+     /* Minimum flex for a periodic job, in milliseconds. */
+-    private static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
++    private static final long MIN_FLEX_MILLIS = 10 * 60 * 1000L; // 10 minutes
+ 
+     private static final long MIN_ALLOWED_TIME_WINDOW_MILLIS = MIN_PERIOD_MILLIS;
+ 
+diff --git a/apex/jobscheduler/service/java/com/android/server/job/JobConcurrencyManager.java b/apex/jobscheduler/service/java/com/android/server/job/JobConcurrencyManager.java
+index 03bf2fede2a27..12173bcead676 100644
+--- a/apex/jobscheduler/service/java/com/android/server/job/JobConcurrencyManager.java
++++ b/apex/jobscheduler/service/java/com/android/server/job/JobConcurrencyManager.java
+@@ -96,24 +96,7 @@ class JobConcurrencyManager {
+ 
+     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
+     private static final String KEY_CONCURRENCY_LIMIT = CONFIG_KEY_PREFIX_CONCURRENCY + "limit";
+-    static final int DEFAULT_CONCURRENCY_LIMIT;
+-
+-    static {
+-        if (ActivityManager.isLowRamDeviceStatic()) {
+-            DEFAULT_CONCURRENCY_LIMIT = 8;
+-        } else {
+-            final long ramBytes = new MemInfoReader().getTotalSize();
+-            if (ramBytes <= GIGABYTES.toBytes(6)) {
+-                DEFAULT_CONCURRENCY_LIMIT = 16;
+-            } else if (ramBytes <= GIGABYTES.toBytes(8)) {
+-                DEFAULT_CONCURRENCY_LIMIT = 20;
+-            } else if (ramBytes <= GIGABYTES.toBytes(12)) {
+-                DEFAULT_CONCURRENCY_LIMIT = 32;
+-            } else {
+-                DEFAULT_CONCURRENCY_LIMIT = 40;
+-            }
+-        }
+-    }
++    static final int DEFAULT_CONCURRENCY_LIMIT = 8;
+ 
+     private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
+             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
+diff --git a/graphics/java/android/graphics/drawable/RippleDrawable.java b/graphics/java/android/graphics/drawable/RippleDrawable.java
+index 641a2ae7b2c32..320146cf3de89 100644
+--- a/graphics/java/android/graphics/drawable/RippleDrawable.java
++++ b/graphics/java/android/graphics/drawable/RippleDrawable.java
+@@ -158,7 +158,7 @@ public class RippleDrawable extends LayerDrawable {
+     private static final LinearInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
+     private static final int DEFAULT_EFFECT_COLOR = 0x8dffffff;
+     /** Temporary flag for teamfood. **/
+-    private static final boolean FORCE_PATTERNED_STYLE = true;
++    private static final boolean FORCE_PATTERNED_STYLE = false;
+ 
+     private final Rect mTempRect = new Rect();
+ 
+diff --git a/telephony/common/com/android/internal/telephony/CarrierAppUtils.java b/telephony/common/com/android/internal/telephony/CarrierAppUtils.java
+index b69a25d8fd208..979be34a6ed60 100644
+--- a/telephony/common/com/android/internal/telephony/CarrierAppUtils.java
++++ b/telephony/common/com/android/internal/telephony/CarrierAppUtils.java
+@@ -483,7 +483,7 @@ private static ApplicationInfo getApplicationInfoIfSystemApp(
+                 return ai;
+             }
+         } catch (PackageManager.NameNotFoundException e) {
+-            Log.w(TAG, "Could not reach PackageManager", e);
++            Log.i(TAG, "Not installed: " + packageName);
+         }
+         return null;
+     }
+diff --git a/core/java/android/database/sqlite/SQLiteDatabase.java b/core/java/android/database/sqlite/SQLiteDatabase.java
+index 432954036912a..0a074688b0695 100644
+--- a/core/java/android/database/sqlite/SQLiteDatabase.java
++++ b/core/java/android/database/sqlite/SQLiteDatabase.java
+@@ -496,10 +496,8 @@ private SQLiteDatabase(@Nullable final String path, @Nullable final int openFlag
+         mConfigurationLocked.lookasideSlotCount = lookasideSlotCount;
+ 
+         // Disable lookaside allocator on low-RAM devices
+-        if (ActivityManager.isLowRamDeviceStatic()) {
+             mConfigurationLocked.lookasideSlotCount = 0;
+             mConfigurationLocked.lookasideSlotSize = 0;
+-        }
+         long effectiveTimeoutMs = Long.MAX_VALUE;
+         // Never close idle connections for in-memory databases
+         if (!mConfigurationLocked.isInMemoryDb()) {
+diff --git a/data/videos/AndroidInSpace.240p.mp4 b/data/videos/AndroidInSpace.240p.mp4
+deleted file mode 100644
+index e1445e493c769..0000000000000
+Binary files a/data/videos/AndroidInSpace.240p.mp4 and /dev/null differ
+diff --git a/data/videos/AndroidInSpace.480p.lq.mp4 b/data/videos/AndroidInSpace.480p.lq.mp4
+deleted file mode 100644
+index f1db6942ebd26..0000000000000
+Binary files a/data/videos/AndroidInSpace.480p.lq.mp4 and /dev/null differ
+diff --git a/data/videos/AndroidInSpace.480p.mq.mp4 b/data/videos/AndroidInSpace.480p.mq.mp4
+deleted file mode 100644
+index 5f4cfb3c33b7d..0000000000000
+Binary files a/data/videos/AndroidInSpace.480p.mq.mp4 and /dev/null differ
+diff --git a/data/videos/Disco.240p.mp4 b/data/videos/Disco.240p.mp4
+deleted file mode 100644
+index c9078b736f90d..0000000000000
+Binary files a/data/videos/Disco.240p.mp4 and /dev/null differ
+diff --git a/data/videos/Disco.480p.lq.mp4 b/data/videos/Disco.480p.lq.mp4
+deleted file mode 100644
+index 411e0d5dacd50..0000000000000
+Binary files a/data/videos/Disco.480p.lq.mp4 and /dev/null differ
+diff --git a/data/videos/Disco.480p.mq.mp4 b/data/videos/Disco.480p.mq.mp4
+deleted file mode 100644
+index 3dc495764b827..0000000000000
+Binary files a/data/videos/Disco.480p.mq.mp4 and /dev/null differ
+diff --git a/data/videos/Sunset.240p.mp4 b/data/videos/Sunset.240p.mp4
+deleted file mode 100644
+index f5c533f0f9f58..0000000000000
+Binary files a/data/videos/Sunset.240p.mp4 and /dev/null differ
+diff --git a/data/videos/Sunset.480p.lq.mp4 b/data/videos/Sunset.480p.lq.mp4
+deleted file mode 100644
+index 7f9d6a1e68887..0000000000000
+Binary files a/data/videos/Sunset.480p.lq.mp4 and /dev/null differ
+diff --git a/data/videos/Sunset.480p.mq.mp4 b/data/videos/Sunset.480p.mq.mp4
+deleted file mode 100644
+index 7691544f019ed..0000000000000
+Binary files a/data/videos/Sunset.480p.mq.mp4 and /dev/null differ
+diff --git a/data/videos/VideoPackage1.mk b/data/videos/VideoPackage1.mk
+deleted file mode 100644
+index ee3b5ed321dce..0000000000000
+--- a/data/videos/VideoPackage1.mk
++++ /dev/null
+@@ -1,26 +0,0 @@
+-#
+-# Copyright (C) 2011 The Android Open Source Project
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#      http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-#
+-
+-# Lower-quality videos for space-constrained devices
+-
+-LOCAL_PATH  := frameworks/base/data/videos
+-TARGET_PATH := system/media/video
+-
+-#PRODUCT_COPY_FILES += \
+-#        $(LOCAL_PATH)/AndroidInSpace.240p.mp4:$(TARGET_PATH)/AndroidInSpace.240p.mp4 \
+-#        $(LOCAL_PATH)/AndroidInSpace.480p.lq.mp4:$(TARGET_PATH)/AndroidInSpace.480p.mp4 \
+-#        $(LOCAL_PATH)/Sunset.240p.mp4:$(TARGET_PATH)/Sunset.240p.mp4 \
+-#        $(LOCAL_PATH)/Sunset.480p.lq.mp4:$(TARGET_PATH)/Sunset.480p.mp4
+diff --git a/data/videos/VideoPackage2.mk b/data/videos/VideoPackage2.mk
+deleted file mode 100644
+index f799bea2c147b..0000000000000
+--- a/data/videos/VideoPackage2.mk
++++ /dev/null
+@@ -1,26 +0,0 @@
+-#
+-# Copyright (C) 2011 The Android Open Source Project
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#      http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-#
+-
+-# Good-quality videos for non-space-constrained devices
+-
+-LOCAL_PATH  := frameworks/base/data/videos
+-TARGET_PATH := system/media/video
+-
+-#PRODUCT_COPY_FILES += \
+-#        $(LOCAL_PATH)/AndroidInSpace.240p.mp4:$(TARGET_PATH)/AndroidInSpace.240p.mp4 \
+-#        $(LOCAL_PATH)/AndroidInSpace.480p.mq.mp4:$(TARGET_PATH)/AndroidInSpace.480p.mp4 \
+-#        $(LOCAL_PATH)/Sunset.240p.mp4:$(TARGET_PATH)/Sunset.240p.mp4 \
+-#        $(LOCAL_PATH)/Sunset.480p.mq.mp4:$(TARGET_PATH)/Sunset.480p.mp4
+diff --git a/media/tests/contents/media_api/HEVC_320_AAC_128.mp4 b/media/tests/contents/media_api/HEVC_320_AAC_128.mp4
+deleted file mode 100644
+index e3e3ef0148a19..0000000000000
+Binary files a/media/tests/contents/media_api/HEVC_320_AAC_128.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/goldenThumbnail.png b/media/tests/contents/media_api/goldenThumbnail.png
+deleted file mode 100644
+index 3bb6ed245dc72..0000000000000
+Binary files a/media/tests/contents/media_api/goldenThumbnail.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17.mp3
+deleted file mode 100644
+index e0d6a1799b3bd..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ABR.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ABR.mp3
+deleted file mode 100644
+index 12f7193286009..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ABR.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_CBR.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_CBR.mp3
+deleted file mode 100644
+index 12f7193286009..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_CBR.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1.mp3
+deleted file mode 100644
+index 29d332b7ba136..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1_ID3V2.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1_ID3V2.mp3
+deleted file mode 100644
+index ea5263827df84..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V1_ID3V2.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V2.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V2.mp3
+deleted file mode 100644
+index 024039c82d8c1..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_ID3V2.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_VBR.mp3 b/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_VBR.mp3
+deleted file mode 100644
+index 12f7193286009..0000000000000
+Binary files a/media/tests/contents/media_api/music/MP3_48KHz_128kbps_s_1_17_VBR.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/SHORTMP3.mp3 b/media/tests/contents/media_api/music/SHORTMP3.mp3
+deleted file mode 100644
+index 8b51b5d9f932c..0000000000000
+Binary files a/media/tests/contents/media_api/music/SHORTMP3.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/ants.mid b/media/tests/contents/media_api/music/ants.mid
+deleted file mode 100644
+index d4ead53141816..0000000000000
+Binary files a/media/tests/contents/media_api/music/ants.mid and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/bzk_chic.wav b/media/tests/contents/media_api/music/bzk_chic.wav
+deleted file mode 100644
+index bab1a6b4bfb5a..0000000000000
+Binary files a/media/tests/contents/media_api/music/bzk_chic.wav and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/sine_200+1000Hz_44K_mo.wav b/media/tests/contents/media_api/music/sine_200+1000Hz_44K_mo.wav
+deleted file mode 100644
+index 24c2a0d4b2f47..0000000000000
+Binary files a/media/tests/contents/media_api/music/sine_200+1000Hz_44K_mo.wav and /dev/null differ
+diff --git a/media/tests/contents/media_api/music/test_amr_ietf.amr b/media/tests/contents/media_api/music/test_amr_ietf.amr
+deleted file mode 100644
+index 540794cf573c0..0000000000000
+Binary files a/media/tests/contents/media_api/music/test_amr_ietf.amr and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H263_500_AMRNB_12.3gp b/media/tests/contents/media_api/video/H263_500_AMRNB_12.3gp
+deleted file mode 100644
+index 46bb2b1511de6..0000000000000
+Binary files a/media/tests/contents/media_api/video/H263_500_AMRNB_12.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H263_56_AAC_24.3gp b/media/tests/contents/media_api/video/H263_56_AAC_24.3gp
+deleted file mode 100644
+index 1fb11925fee8f..0000000000000
+Binary files a/media/tests/contents/media_api/video/H263_56_AAC_24.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H263_56_AMRNB_6.3gp b/media/tests/contents/media_api/video/H263_56_AMRNB_6.3gp
+deleted file mode 100644
+index b6eb6a18982fc..0000000000000
+Binary files a/media/tests/contents/media_api/video/H263_56_AMRNB_6.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H264_320_AAC_64.3gp b/media/tests/contents/media_api/video/H264_320_AAC_64.3gp
+deleted file mode 100644
+index 04680ce3c2bec..0000000000000
+Binary files a/media/tests/contents/media_api/video/H264_320_AAC_64.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H264_320_AMRNB_6.3gp b/media/tests/contents/media_api/video/H264_320_AMRNB_6.3gp
+deleted file mode 100644
+index bc533a221958a..0000000000000
+Binary files a/media/tests/contents/media_api/video/H264_320_AMRNB_6.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H264_500_AAC_128.3gp b/media/tests/contents/media_api/video/H264_500_AAC_128.3gp
+deleted file mode 100644
+index 05d67eaeed92f..0000000000000
+Binary files a/media/tests/contents/media_api/video/H264_500_AAC_128.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H264_HVGA_500_NO_AUDIO.3gp b/media/tests/contents/media_api/video/H264_HVGA_500_NO_AUDIO.3gp
+deleted file mode 100644
+index 13642b25ef1e9..0000000000000
+Binary files a/media/tests/contents/media_api/video/H264_HVGA_500_NO_AUDIO.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/H264_QVGA_500_NO_AUDIO.3gp b/media/tests/contents/media_api/video/H264_QVGA_500_NO_AUDIO.3gp
+deleted file mode 100644
+index 13642b25ef1e9..0000000000000
+Binary files a/media/tests/contents/media_api/video/H264_QVGA_500_NO_AUDIO.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/MPEG2_1500_AAC_128.mp4 b/media/tests/contents/media_api/video/MPEG2_1500_AAC_128.mp4
+deleted file mode 100644
+index 33f66a0876033..0000000000000
+Binary files a/media/tests/contents/media_api/video/MPEG2_1500_AAC_128.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/MPEG4_320_AAC_64.mp4 b/media/tests/contents/media_api/video/MPEG4_320_AAC_64.mp4
+deleted file mode 100644
+index 90f185606d0fe..0000000000000
+Binary files a/media/tests/contents/media_api/video/MPEG4_320_AAC_64.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/big-buck-bunny_trailer.webm b/media/tests/contents/media_api/video/big-buck-bunny_trailer.webm
+deleted file mode 100644
+index 6a17395f67d3b..0000000000000
+Binary files a/media/tests/contents/media_api/video/big-buck-bunny_trailer.webm and /dev/null differ
+diff --git a/media/tests/contents/media_api/video/border_large.3gp b/media/tests/contents/media_api/video/border_large.3gp
+deleted file mode 100644
+index e6221604bda42..0000000000000
+Binary files a/media/tests/contents/media_api/video/border_large.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/AACLC_44.1kHz_256kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/AACLC_44.1kHz_256kbps_s_1_17.mp4
+deleted file mode 100644
+index 32d422129b74f..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/AACLC_44.1kHz_256kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/AACLC_48KHz_256Kbps_s_1_17.3gp b/media/tests/contents/media_api/videoeditor/AACLC_48KHz_256Kbps_s_1_17.3gp
+deleted file mode 100644
+index f911cd3874ccf..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/AACLC_48KHz_256Kbps_s_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/AMRNB_8KHz_12.2Kbps_m_1_17.3gp b/media/tests/contents/media_api/videoeditor/AMRNB_8KHz_12.2Kbps_m_1_17.3gp
+deleted file mode 100644
+index f6fccef06867f..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/AMRNB_8KHz_12.2Kbps_m_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_0_25.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_0_25.3gp
+deleted file mode 100644
+index 593166b2f3014..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_0_25.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_1_17.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_1_17.3gp
+deleted file mode 100644
+index 0138d8043ca27..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_256kbps_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_96kbps_0_25.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_96kbps_0_25.3gp
+deleted file mode 100644
+index 08d97d543e809..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_10fps_96kbps_0_25.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_128kbps_1_35.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_128kbps_1_35.3gp
+deleted file mode 100644
+index b73be034dc90d..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_128kbps_1_35.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_16kHz_32kbps_m_0_26.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_16kHz_32kbps_m_0_26.3gp
+deleted file mode 100644
+index 4bcb3b59d7282..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_16kHz_32kbps_m_0_26.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_0_26.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_0_26.3gp
+deleted file mode 100644
+index 0629f386570f3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_0_26.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_1_17.3gp b/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_1_17.3gp
+deleted file mode 100644
+index c5cd1296bc0a4..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H263_profile0_176x144_15fps_256kbps_AACLC_32kHz_128kbps_s_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_12Mbps_AACLC_44.1khz_64kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_12Mbps_AACLC_44.1khz_64kbps_s_1_17.mp4
+deleted file mode 100644
+index 8486f5515b7df..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_12Mbps_AACLC_44.1khz_64kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_800kbps_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_800kbps_1_17.mp4
+deleted file mode 100644
+index 217305537f5a3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_1080x720_30fps_800kbps_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_1280x1080_30fps_1200Kbps_1_10.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_1280x1080_30fps_1200Kbps_1_10.mp4
+deleted file mode 100644
+index 27eab58f6d41a..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_1280x1080_30fps_1200Kbps_1_10.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_1280x720_15fps_512kbps_AACLC_16khz_48kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_1280x720_15fps_512kbps_AACLC_16khz_48kbps_s_1_17.mp4
+deleted file mode 100644
+index 457dd96eaa7fe..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_1280x720_15fps_512kbps_AACLC_16khz_48kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_176x144_15fps_144kbps_AMRNB_8kHz_12.2kbps_m_1_17.3gp b/media/tests/contents/media_api/videoeditor/H264_BP_176x144_15fps_144kbps_AMRNB_8kHz_12.2kbps_m_1_17.3gp
+deleted file mode 100644
+index dae2062df4775..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_176x144_15fps_144kbps_AMRNB_8kHz_12.2kbps_m_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_1920x1080_30fps_1200Kbps_1_10.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_1920x1080_30fps_1200Kbps_1_10.mp4
+deleted file mode 100644
+index c66ccedced56a..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_1920x1080_30fps_1200Kbps_1_10.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4
+deleted file mode 100644
+index e026fa27607de..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_32kbps_m_1_17.3gp b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_32kbps_m_1_17.3gp
+deleted file mode 100644
+index f9e7306c1b97f..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_32kbps_m_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_64kps_m_0_27.3gp b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_64kps_m_0_27.3gp
+deleted file mode 100644
+index f9e7306c1b97f..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_64kps_m_0_27.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_384kbps_60_0.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_384kbps_60_0.mp4
+deleted file mode 100644
+index 05224ea07fca5..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_15fps_384kbps_60_0.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_192kbps_1_5.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_192kbps_1_5.mp4
+deleted file mode 100644
+index 6ac0480bb46f4..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_192kbps_1_5.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_256kbps_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_256kbps_1_17.mp4
+deleted file mode 100644
+index d589bfbfe7d49..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_640x480_30fps_256kbps_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_720x480_25fps_256kbps_AMRNB_8khz_12.2kbps_m_0_26.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_720x480_25fps_256kbps_AMRNB_8khz_12.2kbps_m_0_26.mp4
+deleted file mode 100644
+index 6bfbe8bdd62b2..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_720x480_25fps_256kbps_AMRNB_8khz_12.2kbps_m_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_1_17.mp4
+deleted file mode 100644
+index 4998ccc986a5d..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AACLC_24KHz_38Kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AACLC_24KHz_38Kbps_s_1_17.mp4
+deleted file mode 100644
+index 6809e7f61c462..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AACLC_24KHz_38Kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AMRNB_8KHz_12.2Kbps_m_0_26.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AMRNB_8KHz_12.2Kbps_m_0_26.mp4
+deleted file mode 100644
+index 74ae62a063453..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_800x480_15fps_512kbps_AMRNB_8KHz_12.2Kbps_m_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_BP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_BP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4
+deleted file mode 100644
+index be050dc2a0066..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_BP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/H264_MP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4 b/media/tests/contents/media_api/videoeditor/H264_MP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4
+deleted file mode 100644
+index 178431d4dac61..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/H264_MP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_1600x1200.jpg b/media/tests/contents/media_api/videoeditor/IMG_1600x1200.jpg
+deleted file mode 100644
+index b09cb147ad944..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_1600x1200.jpg and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_176x144.jpg b/media/tests/contents/media_api/videoeditor/IMG_176x144.jpg
+deleted file mode 100644
+index 97a7ba5c32f7b..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_176x144.jpg and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay1.png b/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay1.png
+deleted file mode 100644
+index 147a925212789..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay1.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay2.png b/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay2.png
+deleted file mode 100644
+index ba206262f5ea3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_176x144_Overlay2.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_320x240.jpg b/media/tests/contents/media_api/videoeditor/IMG_320x240.jpg
+deleted file mode 100644
+index ec5b5bf96ee16..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_320x240.jpg and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_640x480.gif b/media/tests/contents/media_api/videoeditor/IMG_640x480.gif
+deleted file mode 100644
+index 19548df8fc773..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_640x480.gif and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_640x480.jpg b/media/tests/contents/media_api/videoeditor/IMG_640x480.jpg
+deleted file mode 100644
+index c6a96b1e47010..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_640x480.jpg and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_640x480.png b/media/tests/contents/media_api/videoeditor/IMG_640x480.png
+deleted file mode 100644
+index ba206262f5ea3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_640x480.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay1.png b/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay1.png
+deleted file mode 100644
+index ba206262f5ea3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay1.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay2.png b/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay2.png
+deleted file mode 100644
+index 0f32131a632e3..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/IMG_640x480_Overlay2.png and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MP3_48KHz_128kbps_s_1_17.mp3 b/media/tests/contents/media_api/videoeditor/MP3_48KHz_128kbps_s_1_17.mp3
+deleted file mode 100644
+index e0d6a1799b3bd..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MP3_48KHz_128kbps_s_1_17.mp3 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG2_640x480_30fps_192kbps_1_5.mp4 b/media/tests/contents/media_api/videoeditor/MPEG2_640x480_30fps_192kbps_1_5.mp4
+deleted file mode 100644
+index 22a92b2f8d488..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG2_640x480_30fps_192kbps_1_5.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_12fps_92kbps_AMRNB_8KHz_12.2kbps_m_0_27.3gp b/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_12fps_92kbps_AMRNB_8KHz_12.2kbps_m_0_27.3gp
+deleted file mode 100644
+index a73c4821fb461..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_12fps_92kbps_AMRNB_8KHz_12.2kbps_m_0_27.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_30fps_256kbps_AACLC_44.1kHz_96kbps_s_1_17.3gp b/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_30fps_256kbps_AACLC_44.1kHz_96kbps_s_1_17.3gp
+deleted file mode 100644
+index 333b88039a7d7..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_176x144_30fps_256kbps_AACLC_44.1kHz_96kbps_s_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.3gp b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.3gp
+deleted file mode 100644
+index 75a0036368bff..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.mp4
+deleted file mode 100644
+index 75a0036368bff..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_256kbps_0_30.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_256kbps_0_30.mp4
+deleted file mode 100644
+index be15e907d5abd..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_256kbps_0_30.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_512kbps_AACLC_48khz_132kbps_s_0_26.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_512kbps_AACLC_48khz_132kbps_s_0_26.mp4
+deleted file mode 100644
+index d165d685cb6be..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_15fps_512kbps_AACLC_48khz_132kbps_s_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_23.3gp b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_23.3gp
+deleted file mode 100644
+index c12f2c86097a0..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_23.3gp and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_27.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_27.mp4
+deleted file mode 100644
+index 13ad5dbc51418..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_640x480_30fps_512Kbps_0_27.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_161kbps_s_0_26.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_161kbps_s_0_26.mp4
+deleted file mode 100644
+index 8b72c8437d3c8..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_161kbps_s_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_96kbps_s_0_21.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_96kbps_s_0_21.mp4
+deleted file mode 100644
+index 8752fc563640d..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_96kbps_s_0_21.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_800x480_515kbps_15fps_AMR_NB_8KHz_12.2kbps_m_0_26.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_800x480_515kbps_15fps_AMR_NB_8KHz_12.2kbps_m_0_26.mp4
+deleted file mode 100644
+index 829af35042860..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_800x480_515kbps_15fps_AMR_NB_8KHz_12.2kbps_m_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/MPEG4_SP_854x480_15fps_256kbps_AACLC_16khz_48kbps_s_0_26.mp4 b/media/tests/contents/media_api/videoeditor/MPEG4_SP_854x480_15fps_256kbps_AACLC_16khz_48kbps_s_0_26.mp4
+deleted file mode 100644
+index 8b60f433beb3f..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/MPEG4_SP_854x480_15fps_256kbps_AACLC_16khz_48kbps_s_0_26.mp4 and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/Text_FileRenamedTo3gp.3gp b/media/tests/contents/media_api/videoeditor/Text_FileRenamedTo3gp.3gp
+deleted file mode 100644
+index 02103c6d36e74..0000000000000
+--- a/media/tests/contents/media_api/videoeditor/Text_FileRenamedTo3gp.3gp
++++ /dev/null
+@@ -1 +0,0 @@
+-This is a text file
+\ No newline at end of file
+diff --git a/media/tests/contents/media_api/videoeditor/TransitionSpiral_QVGA.jpg b/media/tests/contents/media_api/videoeditor/TransitionSpiral_QVGA.jpg
+deleted file mode 100644
+index 0863df9eb547a..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/TransitionSpiral_QVGA.jpg and /dev/null differ
+diff --git a/media/tests/contents/media_api/videoeditor/corrupted_H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4 b/media/tests/contents/media_api/videoeditor/corrupted_H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4
+deleted file mode 100644
+index 31627c7a8dd58..0000000000000
+Binary files a/media/tests/contents/media_api/videoeditor/corrupted_H264_BP_640x480_12.5fps_256kbps_AACLC_16khz_24kbps_s_0_26.mp4 and /dev/null differ
