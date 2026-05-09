@@ -1,5 +1,5 @@
 # Cleanup
-rm -rf device/infx tools hardware/ device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
+rm -rf device tools hardware/ device/mediatek vendor/infinix vendor/mediatek hardware/mediatek android packages prebuilts prebuilt
 
 # DT
 BRANCH_DT=staging-clv
